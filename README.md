@@ -2,7 +2,7 @@
 A small web crawler written in Python that uses Scrapy. This is done as a part of a school project.
 
 ## Assigment
-The school project is given in the following text (in Serbain):
+The school project is given in the following text (in Serbian):
 
 ### Pronalaženje skrivenog znanja – Projektni zadatak za 2018. godinu
 
@@ -11,6 +11,7 @@ odnose na prikupljanje podataka, njihovu analizu, vizuelizaciju i implementaciju
 učenja.
 
 #### Zadatak 1: Prikupljanje podataka
+
 Realizovati veb indekser (eng. web crawler) sa veb parserom (eng. web scraper), koji prikuplja podatke
 sa muzičkog sajta www.discogs.com. Baza sajta Discogs sadrži veliku količinu podataka o muzičkim
 albumima na celom svetu, kao i mnogo različitih detalja o tim albumima, kao i njihovim autorima. Baza
@@ -20,6 +21,7 @@ Sve prikupljene podatke uneti u relacionu bazu podataka, koju treba da napravite
 PostgreSQL.
 
 Šta je veb indekser?
+
 Cilj veb indeksera je da se poveže na određenu veb stranu i da preuzme njen sadržaj. Parsiranjem date
 strane možemo naći linkove, koji vode na neke druge strane, na koje veb-indekser ponovo može da
 uđe i da ponovi celu proceduru. Pored otkrivanja linkova, parser može da prepozna i druge sadržaje
@@ -28,6 +30,7 @@ ulogama na albumu, imena žanrova, stilova, zemlje porekla.
 Implementaciju veb-indeksera možete raditi u programskim jezicima: C, C++, C#, Java, Python ili PHP.
 Dozvoljeno je i korišćenje i prilagođavanje neke od postojećih implementacija otvorenog koda:
 crawler4j, Heritrix, Nutch, Scrapy, PHP-Crawler, itd.
+
 Šta je veb parser?
 
 Uloga veb parsera je da otkrije potreban sadržaj sa primljenih veb strana. Pri tome potrebno je odrediti
@@ -41,12 +44,14 @@ muzičkim zapisima i da priložite implementacije koje su korišćene za dohvata
 treba da budu preuzeti u konačnom intervalu (~ 120-180 min).
 
 #### Zadatak 2: Analiza podataka
+
 Iz navedenih zapisa ubačenih u bazu podataka (iz zadatka 1), potrebno je uraditi sledeće:
 a) izlistati koliko zapisa pripada svakom od žanrova
 b) izlistati koliko zapisa pripada svakom od stilova
 c) prikazati rang listu prvih 10 albuma koji imaju najveći broj izdatih verzija (više albuma
 može deliti jedno mesto na rang listi, pa konačan broj albuma na listi može biti i veći
-od 10)d) prikazati prvih 50 osoba koje imaju:
+od 10)
+d) prikazati prvih 50 osoba koje imaju:
 * najveći generalni rejting u pesmama (Credits)
 * najviše učešća kao vokal (Vocals)
 * najviše napisanih pesama (Writing & Arrangement)
