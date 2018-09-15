@@ -1,5 +1,6 @@
 import unittest
 from scrapy.http import HtmlResponse
+import json
 from disscoz_crawler.disscoz_crawler.spiders.discoz_spider import DiscozSpider
 
 class TestDiscozSpider(unittest.TestCase):
@@ -23,10 +24,31 @@ class TestDiscozSpider(unittest.TestCase):
         self.assertEqual("Neško Kejdž", self.spider.parse_name(self._response))
 
     def test_profile_data(self):
-        pass
+        expected = json.loads(""" {
+            "Label": "PGP RTS ‎– CD 407239",
+            "Format" : "CD, Album",
+            "Country" : "Serbia",
+            "Released" : "2006",
+            "Genre" : "Pop, Folk, World, & Country",
+            "Style" : ""
+        } """ )
+
+        self.assertTrue(expected == self.spider.parse_profile(self._response))
+
 
     def test_track_list(self):
-        pass
+        expected = ['Kada Mi Se Dogodiš',
+        'Votka I Džin',
+        'Opako',
+        'Nije Meni Suđeno',
+        'Santa Leda',
+        'Sve Mi Ide Naopako',
+        'Doživotno',
+        'Zavistan',
+        'Želiš Mi Sreću',
+        'Ako Me Varaš']
+
+        self.assertEqual(expected, self.spider.parse_track_list(self._response))
 
     def test_parse_page(self):
         pass
