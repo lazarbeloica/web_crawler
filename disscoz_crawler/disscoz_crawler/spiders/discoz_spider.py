@@ -1,7 +1,8 @@
 import scrapy
 import logging
 
-from disscoz_crawler.disscoz_crawler.spiders.utils.spider_utils import ErrorReport
+from disscoz_crawler.spiders.utils.spider_utils import ErrorReport
+from disscoz_crawler.spiders.utils.dizcoz_db_driver import DiscozDBDriver
 
 # workaround
 import sys
@@ -13,7 +14,7 @@ class DiscozSpider(scrapy.Spider):
     Brief: Implementation of a spider intended for scraping data from https://www.discogs.com/
     '''
 
-    name = 'discogs'
+    name = 'discoz'
     allowed_domains = 'discogs.com' # only parse discogs
 
     _url_base = 'https://www.discogs.com/search/?country_exact='
@@ -122,19 +123,21 @@ class DiscozSpider(scrapy.Spider):
 
         Param[in]:  Http response that contains the artists page to parse
         '''
-        pass
-
+        db = DiscozDBDriver()
+        name = self.parse_name(response)
+        if name is not None:
+            db.store_name(name)
 
     def start_requests(self):
         logging.info("Spider " + self.name + "started scraping for country " + self.get_country())
-        yield scrapy.Request(url = self._url_base + self.get_country(), calbalck = self.parse)
+        yield scrapy.Request(url = self._url_base + self.get_country(), callback = self.parse)
 
     def parse(self, response):
         '''
         Brief: Parse the page for urls to follow
         '''
         for page in response.xpath('//a[@class="search_result_title"]'):
-            yield response.follow(page, calbalck = self.parse_artist_page_store_data)
+            yield response.follow(page, callback = self.parse_artist_page_store_data)
 
         logging.info(self.name + ": Acquiring next page to scrape")
-        yield response.follow(response.xpath('//a[@class="pagination_next"]'), calbalck = self.parse)
+        yield response.follow(response.xpath('//a[@class="pagination_next"]')[0], callback = self.parse)

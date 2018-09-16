@@ -1,7 +1,7 @@
 import unittest
 from scrapy.http import HtmlResponse
 import json
-from disscoz_crawler.disscoz_crawler.spiders.discoz_spider import DiscozSpider
+from disscoz_crawler.spiders.discoz_spider import DiscozSpider
 
 class TestDiscozSpider(unittest.TestCase):
     '''
@@ -51,5 +51,5 @@ class TestDiscozSpider(unittest.TestCase):
         self.assertEqual(expected, self.spider.parse_track_list(self._response))
 
     def test_parse_page(self):
-        pass
+        self.spider.parse_artist_page_store_data(self._response)
 
