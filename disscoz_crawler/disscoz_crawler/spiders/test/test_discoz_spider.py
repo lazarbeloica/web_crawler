@@ -1,11 +1,11 @@
 import unittest
+from unittest.mock import MagicMock
 from scrapy.http import HtmlResponse
 import json
 from disscoz_crawler.spiders.discoz_spider import DiscozSpider
 
+
 class TestDiscozSpider(unittest.TestCase):
-    '''
-    '''
 
     TEST_PAGE = "/home/aviator/projects/tsz/src/web_crawler/disscoz_crawler/disscoz_crawler/spiders/test/test_page/pr.html"
 
@@ -50,6 +50,7 @@ class TestDiscozSpider(unittest.TestCase):
 
         self.assertEqual(expected, self.spider.parse_track_list(self._response))
 
-    def test_parse_page(self):
-        self.spider.parse_artist_page_store_data(self._response)
+    def test_parse_name(self):
+        self.assertEqual('Neško Kejdž', self.spider.parse_name(self._response))
+
 
