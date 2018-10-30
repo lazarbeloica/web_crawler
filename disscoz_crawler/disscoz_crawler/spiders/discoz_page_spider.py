@@ -32,7 +32,7 @@ class DiscozPageSpider(scrapy.Spider):
                 country_to_scrape is a neccessary argument
         '''
         DiscozPageSpider._id = DiscozPageSpider._id + 1
-        self._name = 'discoz_page_crawler_' + DiscozPageSpider._id
+        self.name = 'discoz_page_crawler_' + str(DiscozPageSpider._id)
         self._err_recorder = kwargs.get('error_recorder', None)
         super(DiscozPageSpider, self).__init__(*args, **kwargs)
 
@@ -109,7 +109,7 @@ class DiscozPageSpider(scrapy.Spider):
         Param[in]:  Http response that contains the artists page to parse
         '''
         if db_driver is None:
-            logging.error(self._name + ": No db driver is set!")
+            logging.error(self.name + ": No db driver is set!")
             return
 
         logging.info(self.name + ": Parsing an artist")
@@ -117,5 +117,5 @@ class DiscozPageSpider(scrapy.Spider):
 
         with db_driver() as db:
             if name is not None:
-                logging.info(self._name + ": Storing a name")
+                logging.info(self.name + ": Storing a name")
                 db.store_name(name)
