@@ -16,7 +16,6 @@ class TestSpiderPool(unittest.TestCase):
         Brief: Creates a mocked spider Factory
         '''
         self._spider_factory_mock = MagicMock()
-        pass
 
 
     def test_get_spider(self):

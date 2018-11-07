@@ -2,8 +2,8 @@ import MySQLdb
 import logging
 
 class DiscozDBDriver():
-    db_info = {"user" : "db-psz",
-                "psw" : "psz",
+    db_info = {"user" : "root",
+                "psw" : "LakiBel944",
                 "host" : "127.0.0.1",
                 "db" : "discoz"
                 }
@@ -14,7 +14,7 @@ class DiscozDBDriver():
                      passwd=self.db_info["psw"],
                      db=self.db_info["db"])
 
-        logging.info("DB: Conecred")
+        logging.info("DB: Conected")
         self._cursor = self._db.cursor()
 
         self._db.set_character_set('utf8')
@@ -34,5 +34,23 @@ class DiscozDBDriver():
 
     def store_name(self, name):
         logging.info("DB: New name stored to db")
-        print (self._cursor.execute("INSERT INTO artist (name) VALUES ( " + name + " ); "))
+        self._cursor.execute("INSERT INTO artist (name) VALUES ( {0} ); ", (name,))
         self._db.commit()
+
+    def custom_query(self, query):
+        '''
+        Brief: Sends a custom query to the db
+
+        Param [in]: query as string
+
+        Returns: True if successfull
+        '''
+        self._custom_query_res = self._cursor.execute(query)
+
+    def get_custom_query(self):
+        '''
+        Brief: Returns the result of the custom query if available
+
+        Returns [in]: Query result
+        '''
+        return self._cursor.fetchone()
