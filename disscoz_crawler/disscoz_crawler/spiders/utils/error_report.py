@@ -1,5 +1,4 @@
 
-
 class ErrorReport():
 
     def __init__(self, url, component):
@@ -18,4 +17,3 @@ class ErrorReport():
 
     def get_component(self):
         return self._component
-
