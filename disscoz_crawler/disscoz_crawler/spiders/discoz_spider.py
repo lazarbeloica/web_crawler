@@ -3,7 +3,9 @@ import logging
 import time
 
 from disscoz_crawler.spiders.utils.error_report import ErrorReport
-from disscoz_crawler.spiders.utils.dizcoz_db_driver import DiscozDBDriver
+from disscoz_crawler.spiders.discoz_page_spider import DiscozPageSpider
+from disscoz_crawler.spiders.spider_factory.spider_factory import DiscozPageSpiderFactory
+from disscoz_crawler.spiders.utils.spider_pool import SpiderPool
 
 # workaround
 import sys
@@ -22,7 +24,7 @@ class DiscozSpider(scrapy.Spider):
 
     name = 'discoz'
     allowed_domains = ['www.discogs.com', 'discogs.com', 'http://www.discogs.com',
-                        'https://www.discogs.com', '*'] # only parse discogs
+                        'https://www.discogs.com', '*']
     DOWNLOAD_DELAY = 1
     CONCURRENT_REQUESTS_PER_IP = 2
 
@@ -33,6 +35,20 @@ class DiscozSpider(scrapy.Spider):
 
     def get_country(self):
         return self._country
+
+    def set_page_spider_pool(self, pool):
+        '''
+        Brief: Sets a new page spider pool to be used
+
+        Param [in]: pool a spider pool to use
+        '''
+        self._page_spider_pool = pool
+
+    def get_page_spider_pool(self, pool):
+        '''
+        Brief: Gets the page spider pool that is being used
+        '''
+        return self._page_spider_pool
 
     def __init__(self, category=None, *args, **kwargs):
         '''
@@ -45,6 +61,9 @@ class DiscozSpider(scrapy.Spider):
         elif self.get_country() is None:
             logging.error(self.name + ': No country is given')
             raise Exception(self.name + ': No country is given')
+
+        self._page_spider_pool = SpiderPool(DiscozPageSpiderFactory)
+        # TODO: Figure out how to this spider should use the pool
 
         self._err_recorder = kwargs.get('error_recorder', None)
         super(DiscozSpider, self).__init__(*args, **kwargs)

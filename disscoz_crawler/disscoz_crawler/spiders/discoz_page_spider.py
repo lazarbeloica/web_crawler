@@ -1,6 +1,7 @@
 import scrapy
 import logging
 import time
+import threading
 
 from disscoz_crawler.spiders.utils.error_report import ErrorReport
 from disscoz_crawler.spiders.utils.dizcoz_db_driver import DiscozDBDriver
@@ -30,11 +31,31 @@ class DiscozPageSpider(scrapy.Spider):
         '''
         Brief: Initializarion of the spider.
                 country_to_scrape is a neccessary argument
+
+        Param [in]: error_recorder to use for reporting errors
+
+        Param [in]: callback to call when the spider has finished
+                        it's job
         '''
         DiscozPageSpider._id = DiscozPageSpider._id + 1
         self.name = 'discoz_page_crawler_' + str(DiscozPageSpider._id)
         self._err_recorder = kwargs.get('error_recorder', None)
+        self._finished_callback = kwargs.get('callback', None)
         super(DiscozPageSpider, self).__init__(*args, **kwargs)
+
+    def set_onfinished_callback(self, callback):
+        '''
+        Brief: Sets a callback to call when the spider finishes it's job
+
+        Param [in]: callback to be called
+        '''
+        self._finished_callback = callback
+
+    def get_spider_name(self):
+        '''
+        Brief: returns the spider's name
+        '''
+        return self.name
 
     def parse_name(self, response):
         '''
@@ -119,3 +140,8 @@ class DiscozPageSpider(scrapy.Spider):
             if name is not None:
                 logging.info(self.name + ": Storing a name")
                 db.store_name(name)
+
+        if self._finished_callback is not None:
+            self._finished_callback(self, threading.current_thread.__name__)
+        else:
+            logging.warning("No onfinish callback set for this spider!")
