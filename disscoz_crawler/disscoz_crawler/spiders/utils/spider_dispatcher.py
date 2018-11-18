@@ -9,12 +9,15 @@ class SpiderDispatcher():
             to do parsing jobs
     '''
 
-    def __init__(self, spider_pool):
+    def __init__(self, spider_pool, db):
         '''
         Brief: Constructor
 
         Param [in]: spider_pool a pool to use for getting spiders
+
+        Param [in]: db to be used
         '''
+        self._db = db
         self._spider_pool = spider_pool
         self._active_threads = {}
         self._mutex = Lock()
@@ -28,6 +31,12 @@ class SpiderDispatcher():
         '''
         return 'Thread' + spider.get_spider_name()
 
+    def set_db_driver(self, db):
+        '''
+        Brief: sets a db driver to be used
+        '''
+        self._db = db
+
     def dispatch(self, request):
         '''
         Brief: Dispaches a spider to parse a given request
@@ -38,7 +47,7 @@ class SpiderDispatcher():
         spider.set_onfinished_callback(self.on_spider_finished)
 
         thread_name = self._generate_thread_name(spider)
-        self._active_threads[thread_name] = Thread(name=thread_name, target=spider.parse_artist_page_store_data, args=(request,))
+        self._active_threads[thread_name] = Thread(name=thread_name, target=spider.parse_artist_page_store_data, args=(request,self._db))
         self._active_threads[thread_name].start()
         logging.debug(spider.get_spider_name() + "Spider dispatched!")
 
