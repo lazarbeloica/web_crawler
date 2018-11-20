@@ -71,12 +71,16 @@ class DiscozSpider(scrapy.Spider):
         '''
         logging.info(self.name + ": Scraping the data page")
         for page in response.xpath('//a[@class="search_result_title"]/@href'):
-            logging.info(self.name + ": Found an artist")
-            next_page = response.urljoin(page.extract())
-            print(next_page)
-            yield scrapy.Request(next_page, callback=self._spider_dispatcher.dispatch)
+            data_page = response.urljoin(page.extract())
+            logging.info(self.name + ": Found an artist. Url: " + data_page)
+            yield scrapy.Request(data_page, callback=self._spider_dispatcher.dispatch)
 
-        yield scrapy.Request(response.xpath('//a[@class="pagination_next"]')[0], callback = self.parse)
+        next_page = response.urljoin(response.xpath('//a[@class="pagination_next"]')[0].extract())
+        logging.info(self.name + "Going to the next page: " + next_page)
+        yield scrapy.Request(next_page, callback = self.parse)
+
+        logging.info(self.name + ": All done indexing... Waiting for page parsing to be done...")
+        self._spider_dispatcher.shut_down()
 
         print("Getting the error report:")
         if self._err_recorder is not None:

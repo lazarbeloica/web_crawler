@@ -5,4 +5,4 @@ test:
 	@cd ${WEB_CRAWLER}; ${PYTHON} -m unittest discover
 
 run:
-	@cd ${WEB_CRAWLER}; scrapy crawl -a country_to_scrape=${COUNTRY} discoz
+	@cd ${WEB_CRAWLER}; scrapy crawl -a country_to_scrape=Serbia discoz_spider

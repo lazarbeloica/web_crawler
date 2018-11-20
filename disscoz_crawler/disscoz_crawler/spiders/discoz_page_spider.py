@@ -65,8 +65,13 @@ class DiscozPageSpider(scrapy.Spider):
 
         Returns:    The name of the artist
         '''
-        logging.info("Parsing out the name...")
-        res = response.xpath('//div[@class="profile"]/h1/spanitemprop/text()').extract()[0].strip()
+        logging.info(self.name + "Parsing out the name...")
+        res = None
+        try:
+            res = response.xpath('//div[@class="profile"]/h1/spanitemprop/text()').extract()[0].strip()
+        except:
+            logging.error(self.name + ": Couldn't parse the artist name")
+
         if res is None and self._err_recorder is not None:
             self._err_recorder.report_possible_error(response.url, "Artists name")
         return res
@@ -144,4 +149,4 @@ class DiscozPageSpider(scrapy.Spider):
         if self._finished_callback is not None:
             self._finished_callback(self, threading.current_thread.__name__)
         else:
-            logging.warning("No onfinish callback set for this spider!")
+            logging.warning(self.name + "No onfinish callback set for this spider!")

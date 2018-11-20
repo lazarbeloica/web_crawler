@@ -49,7 +49,7 @@ class SpiderDispatcher():
         thread_name = self._generate_thread_name(spider)
         self._active_threads[thread_name] = Thread(name=thread_name, target=spider.parse_artist_page_store_data, args=(request,self._db))
         self._active_threads[thread_name].start()
-        logging.debug(spider.get_spider_name() + "Spider dispatched!")
+        logging.debug(spider.get_spider_name() + ": Spider dispatched!")
 
         self._mutex.acquire()
         self._num_active_threads = self._num_active_threads + 1
@@ -69,7 +69,7 @@ class SpiderDispatcher():
         try:
             self._spider_pool.put_spider(spider)
             self._active_threads[thread_name] = None
-            logging.debug(spider.get_spider_name()+ " finished!")
+            logging.debug(spider.get_spider_name()+ ": finished!")
         finally:
             self._num_active_threads = self._num_active_threads - 1
             self._mutex.release()
