@@ -18,9 +18,13 @@ class ArtistData(scrapy.Item):
     '''
     Brief: Class holding the data to be sent to the spider pipeline
     '''
-    name = scrapy.Field()
+    artist_name = scrapy.Field()
+    album_name = scrapy.Field()
+    released = scrapy.Field()
+    country = scrapy.Field()
     profile = scrapy.Field()
     track_list = scrapy.Field()
+    album_version = scrapy.Field()
 
 class DiscozSpider(scrapy.Spider):
     '''
@@ -84,24 +88,24 @@ class DiscozSpider(scrapy.Spider):
             logging.info(self.name + ": Found an artist. Url: " + data_page)
             yield response.follow(page, callback=self.parse_artist_page_store_data)
 
-        # next_page = response.urljoin(response.xpath('//a[@class="pagination_next"]')[0].extract())
-        # logging.info(self.name + "Going to the next page: " + next_page)
-        # yield response.follow(response.xpath('//a[@class="pagination_next"]')[0], callback = self.parse_discogz)
+        #next_page = response.urljoin(response.xpath('//a[@class="pagination_next"]')[0].extract())
+        #logging.info(self.name + "Going to the next page: " + next_page)
+        #yield response.follow(response.xpath('//a[@class="pagination_next"]')[0], callback = self.parse_discogz)
 
         print("Getting the error report:")
         if self._err_recorder is not None:
             print(self._err_recorder.get_error_reports())
 
 
-    def parse_name(self, response):
+    def parse_artist_name(self, response):
         '''
-        Brief:      Parses for the page title
+        Brief:      Parses for the artists name
 
         Param[in]:  Http response conataining the artist info page
 
         Returns:    The name of the artist
         '''
-        logging.info(self.name + ": Parsing out the name...")
+        logging.info(self.name + ": Parsing out the artist name...")
         res = None
         try:
             res = response.xpath('//div[@class="profile"]/h1/span[1]/span/a/text()').extract()[0].strip()
@@ -110,6 +114,27 @@ class DiscozSpider(scrapy.Spider):
 
         if res is None and self._err_recorder is not None:
             self._err_recorder.report_possible_error(response.url, "Artists name")
+
+        return res
+
+
+    def parse_album_name(self, response):
+        '''
+        Brief:      Parses for the album
+
+        Param[in]:  Http response conataining the artist info page
+
+        Returns:    The name of the album
+        '''
+        logging.info(self.name + ": Parsing out the album name...")
+        res = None
+        try:
+            res = response.xpath('//div[@class="profile"]/h1/span[2]/text()').extract()[0].strip()
+        except:
+            logging.error(self.name + ": Couldn't parse the album name")
+
+        if res is None and self._err_recorder is not None:
+            self._err_recorder.report_possible_error(response.url, "Album name")
 
         return res
 
@@ -153,6 +178,11 @@ class DiscozSpider(scrapy.Spider):
         return data
 
 
+    def parse_album_versions(self, response):
+        versions = len(response.selector.xpath('//table[@id="versions"]/tr'))
+        return (1 if versions == 0 else versions - 1)
+
+
     def parse_artist_page_store_data(self, response):
         '''
         Brief:      Parses the page containing information
@@ -171,9 +201,11 @@ class DiscozSpider(scrapy.Spider):
 
         data = ArtistData()
 
-        data['name'] = self.parse_name(response)
+        data['artist_name'] = self.parse_artist_name(response)
+        data['album_name'] = self.parse_album_name(response)
         data['profile'] = self.parse_profile(response)
+        data['album_version'] = self.parse_album_versions(response)
         data['track_list'] = self.parse_track_list(response)
         yield data # sending it off to the pipeline
-        logging.info(self.name + ': Done parsing data for artist ' + data['name'])
+        logging.info(self.name + ': Done parsing data for artist ' + data['artist_name'])
 
