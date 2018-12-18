@@ -10,8 +10,8 @@ from dateutil import parser
 
 class DisscozCrawlerDBPipeline(object):
 
-    db_info = {"user" : "root",
-            "psw" : "LakiBel944",
+    db_info = {"user" : "scrapy",
+            "psw" : "passwrd",
             "host" : "127.0.0.1",
             "db" : "discoz"
             }
