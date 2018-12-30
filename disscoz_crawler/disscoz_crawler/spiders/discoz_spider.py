@@ -20,8 +20,6 @@ class ArtistData(scrapy.Item):
     '''
     artist_name = scrapy.Field()
     album_name = scrapy.Field()
-    released = scrapy.Field()
-    country = scrapy.Field()
     profile = scrapy.Field()
     track_list = scrapy.Field()
     album_version = scrapy.Field()

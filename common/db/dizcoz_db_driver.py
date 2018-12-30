@@ -47,7 +47,16 @@ class DiscozDBDriver():
         self._custom_query_res = self._cursor.execute(query)
 
 
-    def get_custom_query(self):
+    def get_next_result(self):
+        '''
+        Brief: Returns the result of the custom query if available
+
+        Returns [in]: Query result
+        '''
+        return self._cursor.fetchone()
+
+
+    def get_all_results(self):
         '''
         Brief: Returns the result of the custom query if available
 
