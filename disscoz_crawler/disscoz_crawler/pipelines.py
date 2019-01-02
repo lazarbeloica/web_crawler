@@ -148,7 +148,12 @@ class DisscozCrawlerDBPipeline(object):
         logging.info("DB: Storing tracks to db")
         for track in tracks:
             try:
-                self._cursor.execute("""INSERT INTO track_list (album_id, track_name) VALUES (%s,%s);""", (album_id, track))
+                track_name = track[0]
+
+                if track[1] is not None:
+                    duration = track[1].total_seconds()
+
+                self._cursor.execute("""INSERT INTO track_list (album_id, track_name, duration) VALUES ({0},"{1}",{2});""".format(album_id, track_name, duration if track[1] is not None else 'null' ))
                 self._db.commit()
             except Exception as err:
                 self._db.rollback()

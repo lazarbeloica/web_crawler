@@ -8,6 +8,7 @@ from disscoz_crawler.spiders.utils.spider_pool import SpiderPool
 from disscoz_crawler.spiders.spider_factory.spider_factory import DiscozPageSpiderFactory
 from disscoz_crawler.spiders.utils.dizcoz_db_driver import DiscozDBDriver
 import time
+from datetime import datetime
 
 # workaround
 import sys
@@ -34,9 +35,7 @@ class DiscozSpider(scrapy.Spider):
 
     '''
 
-    #download_delay = 1
-    COOKIES_ENABLED = False
-    ROBOTSTXT_OBEY = True
+    download_delay = 1
 
     name = 'discoz_spider'
     allowed_domains = ['discogs.com']
@@ -89,10 +88,6 @@ class DiscozSpider(scrapy.Spider):
         #next_page = response.urljoin(response.xpath('//a[@class="pagination_next"]')[0].extract())
         #logging.info(self.name + "Going to the next page: " + next_page)
         #yield response.follow(response.xpath('//a[@class="pagination_next"]')[0], callback = self.parse_discogz)
-
-        print("Getting the error report:")
-        if self._err_recorder is not None:
-            print(self._err_recorder.get_error_reports())
 
 
     def parse_artist_name(self, response):
@@ -169,10 +164,25 @@ class DiscozSpider(scrapy.Spider):
 
         Param[in]:  Http response conataining the artist info page
 
-        Returns:    List of the tracks performed by the artist
+        Returns:    List of the tracks performed by the artist and duration of each track
         '''
+        tracklist_selectors = response.selector.xpath("//tr[@class=' tracklist_track track']")
+        tracklist_selectors.append(response.selector.xpath("//tr[@class='first tracklist_track track']"))
 
-        data = response.selector.xpath("//span[@class='tracklist_track_title']/text()").extract()
+        data = []
+        for selector in  tracklist_selectors:
+            title = selector.xpath("./td[@class='track tracklist_track_title ']/a/span/text()").extract()
+            if title == []:
+                title = selector.xpath("./td[@class='track tracklist_track_title mini_playlist_track_has_artist']/a/span/text()").extract()
+
+            duration = selector.xpath("./td[@class='tracklist_track_duration']/span/text()").extract()
+            if duration != []:
+                duration = [datetime.strptime(duration, '%M:%S')]
+            else:
+                duration = None
+
+            data.append([title[0].strip(), duration])
+
         return data
 
 
