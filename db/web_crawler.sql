@@ -70,7 +70,7 @@
 		id INT AUTO_INCREMENT PRIMARY KEY,
 		album_id INT NOT NULL,
 		track_name national varchar(60),
-        duration time,
+        duration int,
 		FOREIGN KEY fk_id(album_id)
 		REFERENCES album(id),
 		unique(album_id, track_name)

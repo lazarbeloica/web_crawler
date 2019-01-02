@@ -6,7 +6,9 @@
 import logging
 import MySQLdb
 from dateutil import parser
+import datetime
 
+logging.getLogger().setLevel(logging.INFO)
 
 class DisscozCrawlerDBPipeline(object):
 
@@ -151,7 +153,7 @@ class DisscozCrawlerDBPipeline(object):
                 track_name = track[0]
 
                 if track[1] is not None:
-                    duration = track[1].total_seconds()
+                    duration = round((track[1][0] - datetime.datetime.strptime("0:0", '%M:%S')).total_seconds())
 
                 self._cursor.execute("""INSERT INTO track_list (album_id, track_name, duration) VALUES ({0},"{1}",{2});""".format(album_id, track_name, duration if track[1] is not None else 'null' ))
                 self._db.commit()

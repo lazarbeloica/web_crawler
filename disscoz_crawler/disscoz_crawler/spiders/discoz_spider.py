@@ -15,6 +15,8 @@ import sys
 sys.path.append('/usr/local/lib/python3.5/dist-packages')
 import html2text
 
+logging.getLogger().setLevel(logging.INFO)
+
 class ArtistData(scrapy.Item):
     '''
     Brief: Class holding the data to be sent to the spider pipeline
@@ -36,6 +38,8 @@ class DiscozSpider(scrapy.Spider):
     '''
 
     download_delay = 1
+    COOKIES_ENABLED = False
+    ROBOTSTXT_OBEY = True
 
     name = 'discoz_spider'
     allowed_domains = ['discogs.com']
@@ -177,7 +181,7 @@ class DiscozSpider(scrapy.Spider):
 
             duration = selector.xpath("./td[@class='tracklist_track_duration']/span/text()").extract()
             if duration != []:
-                duration = [datetime.strptime(duration, '%M:%S')]
+                duration = [datetime.strptime(duration[0].strip(), '%M:%S')]
             else:
                 duration = None
 
