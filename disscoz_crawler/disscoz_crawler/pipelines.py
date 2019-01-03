@@ -79,17 +79,17 @@ class DisscozCrawlerDBPipeline(object):
         return dt
 
 
-    def store_general_album_info(self, album_name, vesions, released, country, artist_id):
+    def store_general_album_info(self, album_name, vesions, released, country, album_rating, artist_id):
         try:
             logging.debug('DB: Storing album name ' + album_name)
 
             if released:
-                query_data = [artist_id, album_name, vesions, self.convert_to_date(released), country]
-                self._cursor.execute("""INSERT INTO album (artist_id, album_name, versions, released, country ) VALUES ({0},"{1}",{2},"{3}","{4}");""".format(*query_data))
+                query_data = [artist_id, album_name, vesions, self.convert_to_date(released), country, album_rating]
+                self._cursor.execute("""INSERT INTO album (artist_id, album_name, versions, released, country, rating) VALUES ({0},"{1}",{2},"{3}","{4}", {5});""".format(*query_data))
 
             else:
-                query_data = [artist_id, album_name, vesions, country]
-                self._cursor.execute("""INSERT INTO album (artist_id, album_name, versions, country ) VALUES ({0},"{1}",{2},"{3}"); """.format(*query_data))
+                query_data = [artist_id, album_name, vesions, country, album_rating]
+                self._cursor.execute("""INSERT INTO album (artist_id, album_name, versions, country, rating) VALUES ({0},"{1}",{2},"{3}", {4}); """.format(*query_data))
 
             self._db.commit()
 
@@ -162,6 +162,56 @@ class DisscozCrawlerDBPipeline(object):
                 logging.error(err)
                 logging.error('Track in db already - ' + track)
 
+    def _artist_id_for_name(self, artist_name):
+        '''
+        Brief: Gets artist id from the db for given name,
+                if artist doesn't exists in the db, the artist is added
+
+        Retruns: Artist id from the db
+        '''
+        artist_id = self.get_artist_id(artist_name)
+
+        if artist_id is None:
+            artist_id = self.store_artist_name(artist_name)
+        return artist_id
+
+
+    def store_credits(self, album_credits, album_id):
+        print()
+        print(album_credits['vocals'])
+        print(album_credits['writting'])
+        print(album_credits['arranging'])
+        print()
+
+        for vocal in album_credits['vocals']:
+            try:
+                print(vocal)
+                artist_id = self._artist_id_for_name(vocal)
+                print(artist_id)
+                self._cursor.execute(""" insert into album_vocals(album_id, artist_id) values({0}, {1});""".format(album_id, artist_id))
+            except Exception as err:
+                self._db.rollback()
+                logging.error(err)
+
+        for writter in album_credits['writting']:
+            try:
+                print(writter)
+                artist_id = self._artist_id_for_name(writter)
+                print(artist_id)
+                self._cursor.execute(""" insert into album_vocals(album_id, artist_id) values({0}, {1});""".format(album_id, artist_id))
+            except Exception as err:
+                self._db.rollback()
+                logging.error(err)
+
+        for arranger in album_credits['arranging']:
+            try:
+                print(arranger)
+                artist_id = self._artist_id_for_name(arranger)
+                print(artist_id)
+                self._cursor.execute(""" insert into album_vocals(album_id, artist_id) values({0}, {1});""".format(album_id, artist_id))
+            except Exception as err:
+                self._db.rollback()
+                logging.error(err)
 
     #pipline methods
     def open_spider(self, spider):
@@ -179,14 +229,13 @@ class DisscozCrawlerDBPipeline(object):
         logging.debug('Got the data in the pipeline')
 
         try:
-            artist_id = self.get_artist_id(item['artist_name'])
+            artist_id = self._artist_id_for_name(item['artist_name'])
 
-            if artist_id is None:
-                artist_id = self.store_artist_name(item['artist_name'])
-            album_id = self.store_general_album_info(item['album_name'], item['album_version'], item['profile']['Released'], item['profile']['Country'], artist_id)
+            album_id = self.store_general_album_info(item['album_name'], item['album_version'], item['profile']['Released'], item['profile']['Country'], item['album_rating'], artist_id)
 
             self.store_profile(item['profile'], album_id)
             self.store_tracks(item['track_list'], album_id)
+            self.store_credits(item['album_credits'], album_id)
         except Exception as error:
             logging.error("An error with db occured")
             logging.error(error)

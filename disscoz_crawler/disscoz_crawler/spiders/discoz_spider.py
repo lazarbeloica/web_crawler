@@ -1,6 +1,7 @@
 import scrapy
 import logging
 import time
+import re
 
 from disscoz_crawler.spiders.utils.error_report import ErrorReport
 from disscoz_crawler.spiders.utils.spider_dispatcher import SpiderDispatcher
@@ -26,6 +27,8 @@ class ArtistData(scrapy.Item):
     profile = scrapy.Field()
     track_list = scrapy.Field()
     album_version = scrapy.Field()
+    album_rating = scrapy.Field()
+    album_credits = scrapy.Field()
 
 class DiscozSpider(scrapy.Spider):
     '''
@@ -175,10 +178,7 @@ class DiscozSpider(scrapy.Spider):
 
         data = []
         for selector in  tracklist_selectors:
-            title = selector.xpath("./td[@class='track tracklist_track_title ']/a/span/text()").extract()
-            if title == []:
-                title = selector.xpath("./td[@class='track tracklist_track_title mini_playlist_track_has_artist']/a/span/text()").extract()
-
+            title = selector.xpath("./td[@class='track tracklist_track_title '] |  ./td[@class='track tracklist_track_title mini_playlist_track_has_artist']").xpath("./a/span/text() | ./span/text()").extract()
             duration = selector.xpath("./td[@class='tracklist_track_duration']/span/text()").extract()
             if duration != []:
                 duration = [datetime.strptime(duration[0].strip(), '%M:%S')]
@@ -193,6 +193,61 @@ class DiscozSpider(scrapy.Spider):
     def parse_album_versions(self, response):
         versions = len(response.selector.xpath('//table[@id="versions"]/tr'))
         return (1 if versions == 0 else versions - 1)
+
+
+    def _role_matcher(self, pattern, roles, selector):
+        '''
+        Brief: Mathes the pattern in given roles list and returns the
+                list of elements from the selector that corispond to the matched role
+        '''
+        if roles == []:
+            return []
+
+        regex = re.compile(pattern, re.IGNORECASE)
+        if regex.search(roles):
+            person = selector.xpath("./a[@class='rollover_link']/text()").extract()
+            return person
+
+        return []
+
+
+    def parse_credits(self, response):
+        '''
+        Brief: Parses for data in Credits such as Vocals, Wirting & Arangmants
+
+        Returns: json with parsed data
+        '''
+        arangmants = []
+        writters = []
+        vocals = []
+        for selector in response.selector.xpath("//ul[@class='list_no_style']/li"):
+            roles = selector.xpath("./span[@class='role']/text()").extract()
+            roles = roles[0] if roles != [] else ""
+
+            res = self._role_matcher('vocals', roles, selector)
+            vocals = vocals + res
+
+            res = self._role_matcher('written', roles, selector)
+            writters = writters + res
+
+            res = self._role_matcher('arranged', roles, selector)
+            arangmants = arangmants + res
+
+        return {'vocals': vocals, 'writting': writters, 'arranging': arangmants}
+
+    def parse_rating(self, response):
+        '''
+        Brief: Parses for album rating
+
+        Returns: Album rating aout of 5
+        '''
+        rating = response.selector.xpath("//span[@class='rating_value']/text()").extract()[0]
+        try:
+            rating = int(rating)
+        except:
+            rating = 0
+
+        return rating
 
 
     def parse_artist_page_store_data(self, response):
@@ -218,6 +273,8 @@ class DiscozSpider(scrapy.Spider):
         data['profile'] = self.parse_profile(response)
         data['album_version'] = self.parse_album_versions(response)
         data['track_list'] = self.parse_track_list(response)
+        data['album_rating'] = self.parse_rating(response)
+        data['album_credits'] = self.parse_credits(response)
         yield data # sending it off to the pipeline
         logging.info(self.name + ': Done parsing data for artist ' + data['artist_name'])
 

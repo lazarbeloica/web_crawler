@@ -1,3 +1,6 @@
+	DROP TABLE album_vocals;
+    DROP TABLE album_writers;
+    DROP TABLE album_aragments;
 	DROP TABLE track_list;
     DROP TABLE album_genre;
     DROP TABLE album_style;
@@ -20,6 +23,7 @@
 		versions int not null,
 		released DATE default null,
 		country national VARCHAR(60),
+        rating int default NULL,
 		foreign key fk_id(artist_id)
 		references artist(id)
 	);
@@ -76,3 +80,35 @@
 		unique(album_id, track_name)
 	);
 
+	CREATE TABLE album_vocals
+	(
+		album_id INT NOT NULL,
+		artist_id INT NOT NULL,
+		FOREIGN KEY fk_id(album_id)
+		REFERENCES album(id),
+        FOREIGN KEY fk_id(artist_id)
+		REFERENCES artist(id),
+		primary key(album_id, artist_id)
+	);
+
+    CREATE TABLE album_writers
+	(
+		album_id INT NOT NULL,
+		artist_id INT NOT NULL,
+		FOREIGN KEY fk_id(album_id)
+		REFERENCES album(id),
+        FOREIGN KEY fk_id(artist_id)
+		REFERENCES artist(id),
+		primary key(album_id, artist_id)
+	);
+
+    CREATE TABLE album_aragments
+	(
+		album_id INT NOT NULL,
+		artist_id INT NOT NULL,
+		FOREIGN KEY fk_id(album_id)
+		REFERENCES album(id),
+        FOREIGN KEY fk_id(artist_id)
+		REFERENCES artist(id),
+		primary key(album_id, artist_id)
+	);
