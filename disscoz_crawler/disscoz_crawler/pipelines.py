@@ -43,12 +43,15 @@ class DisscozCrawlerDBPipeline(object):
     def get_artist_id(self, name):
         try:
 
-            self._cursor.execute("""select id from artist where artist_name="%s"; """, (name,))
+            self._cursor.execute("""select id from artist where artist_name="{0}"; """.format(name))
             self._db.commit()
 
             artist_id = self._cursor.fetchone()
-
-            return artist_id
+            print()
+            print("here goes")
+            print(artist_id)
+            print()
+            return None if artist_id is None else artist_id[0]
         except Exception as err:
             self._db.rollback()
             logging.error(err)
@@ -177,17 +180,9 @@ class DisscozCrawlerDBPipeline(object):
 
 
     def store_credits(self, album_credits, album_id):
-        print()
-        print(album_credits['vocals'])
-        print(album_credits['writting'])
-        print(album_credits['arranging'])
-        print()
-
         for vocal in album_credits['vocals']:
             try:
-                print(vocal)
                 artist_id = self._artist_id_for_name(vocal)
-                print(artist_id)
                 self._cursor.execute(""" insert into album_vocals(album_id, artist_id) values({0}, {1});""".format(album_id, artist_id))
             except Exception as err:
                 self._db.rollback()
@@ -195,9 +190,7 @@ class DisscozCrawlerDBPipeline(object):
 
         for writter in album_credits['writting']:
             try:
-                print(writter)
                 artist_id = self._artist_id_for_name(writter)
-                print(artist_id)
                 self._cursor.execute(""" insert into album_vocals(album_id, artist_id) values({0}, {1});""".format(album_id, artist_id))
             except Exception as err:
                 self._db.rollback()
@@ -205,9 +198,7 @@ class DisscozCrawlerDBPipeline(object):
 
         for arranger in album_credits['arranging']:
             try:
-                print(arranger)
                 artist_id = self._artist_id_for_name(arranger)
-                print(artist_id)
                 self._cursor.execute(""" insert into album_vocals(album_id, artist_id) values({0}, {1});""".format(album_id, artist_id))
             except Exception as err:
                 self._db.rollback()

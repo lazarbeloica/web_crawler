@@ -92,9 +92,13 @@ class DiscozSpider(scrapy.Spider):
             logging.info(self.name + ": Found an artist. Url: " + data_page)
             yield response.follow(page, callback=self.parse_artist_page_store_data)
 
-        #next_page = response.urljoin(response.xpath('//a[@class="pagination_next"]')[0].extract())
-        #logging.info(self.name + "Going to the next page: " + next_page)
-        #yield response.follow(response.xpath('//a[@class="pagination_next"]')[0], callback = self.parse_discogz)
+        next_page = response.urljoin(response.xpath('//a[@class="pagination_next"]')[0].extract())
+        logging.info(self.name + "Going to the next page: " + next_page)
+        yield response.follow(response.xpath('//a[@class="pagination_next"]')[0], callback = self.parse_discogz)
+
+
+    def _clense_name(self, name):
+        return re.sub('\([0-9]+\)','',name).strip()
 
 
     def parse_artist_name(self, response):
@@ -115,7 +119,7 @@ class DiscozSpider(scrapy.Spider):
         if res is None and self._err_recorder is not None:
             self._err_recorder.report_possible_error(response.url, "Artists name")
 
-        return res
+        return self._clense_name(res)
 
 
     def parse_album_name(self, response):
@@ -243,7 +247,7 @@ class DiscozSpider(scrapy.Spider):
         '''
         rating = response.selector.xpath("//span[@class='rating_value']/text()").extract()[0]
         try:
-            rating = int(rating)
+            rating = float(rating)
         except:
             rating = 0
 

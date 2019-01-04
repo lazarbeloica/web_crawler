@@ -12,7 +12,8 @@
 	CREATE TABLE artist
 	(
 		id INT PRIMARY KEY AUTO_INCREMENT,
-		artist_name national VARCHAR(60)
+		artist_name national VARCHAR(60),
+		unique(artist_name)
 	);
 
 	create table album
@@ -23,7 +24,7 @@
 		versions int not null,
 		released DATE default null,
 		country national VARCHAR(60),
-        rating int default NULL,
+        rating float default NULL,
 		foreign key fk_id(artist_id)
 		references artist(id)
 	);
