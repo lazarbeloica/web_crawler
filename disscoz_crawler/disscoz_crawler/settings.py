@@ -65,7 +65,8 @@ DOWNLOAD_DELAY = 3
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'disscoz_crawler.pipelines.DisscozCrawlerDBPipeline': 300,
+    'disscoz_crawler.discogz_parser_pipeline.DisscozParserPipeline': 0,
+    'disscoz_crawler.discogz_db_pipeline.DisscozCrawlerDBPipeline': 300,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)

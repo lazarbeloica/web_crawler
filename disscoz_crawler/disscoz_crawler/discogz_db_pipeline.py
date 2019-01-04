@@ -2,13 +2,15 @@
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-
+import scrapy
 import logging
 import MySQLdb
 from dateutil import parser
-import datetime
+from datetime import datetime
 
-logging.getLogger().setLevel(logging.INFO)
+
+# logging.getLogger().setLevel(logging.INFO)
+
 
 class DisscozCrawlerDBPipeline(object):
 
@@ -48,7 +50,7 @@ class DisscozCrawlerDBPipeline(object):
 
             artist_id = self._cursor.fetchone()
             print()
-            print("here goes")
+            print("there goes")
             print(artist_id)
             print()
             return None if artist_id is None else artist_id[0]
