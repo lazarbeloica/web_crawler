@@ -158,7 +158,7 @@ class DisscozCrawlerDBPipeline(object):
                 track_name = track[0]
 
                 if track[1] is not None:
-                    duration = round((track[1][0] - datetime.datetime.strptime("0:0", '%M:%S')).total_seconds())
+                    duration = round((track[1][0] - datetime.strptime("0:0", '%M:%S')).total_seconds())
 
                 self._cursor.execute("""INSERT INTO track_list (album_id, track_name, duration) VALUES ({0},"{1}",{2});""".format(album_id, track_name, duration if track[1] is not None else 'null' ))
                 self._db.commit()
@@ -235,5 +235,5 @@ class DisscozCrawlerDBPipeline(object):
             return item
 
         self.count = self.count + 1
-        logging.debug("Current count is %d" % self.count)
+        logging.info("Current count is %d" % self.count)
         return item
