@@ -3,7 +3,7 @@ import logging
 
 from disscoz_crawler.items import ResponseData
 
-#logging.getLogger().setLevel(logging.INFO)
+logging.getLogger().setLevel(logging.INFO)
 
 
 class DiscozSpider(scrapy.Spider):

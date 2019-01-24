@@ -17,7 +17,7 @@ import html2text
 
 from disscoz_crawler.items import ArtistData
 
-# logging.getLogger().setLevel(logging.INFO)
+logging.getLogger().setLevel(logging.INFO)
 
 
 class DisscozParserPipeline(object):

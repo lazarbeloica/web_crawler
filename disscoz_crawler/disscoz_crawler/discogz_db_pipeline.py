@@ -9,7 +9,7 @@ from dateutil import parser
 from datetime import datetime
 
 
-# logging.getLogger().setLevel(logging.INFO)
+logging.getLogger().setLevel(logging.INFO)
 
 
 class DisscozCrawlerDBPipeline(object):
@@ -49,10 +49,6 @@ class DisscozCrawlerDBPipeline(object):
             self._db.commit()
 
             artist_id = self._cursor.fetchone()
-            print()
-            print("there goes")
-            print(artist_id)
-            print()
             return None if artist_id is None else artist_id[0]
         except Exception as err:
             self._db.rollback()
