@@ -9,8 +9,7 @@
 #include <fstream>
 #include <iterator>
 #include <string>
-
-#include <sqlite3pp.h>
+#include <sstream>
 
 using namespace kmeans;
 
@@ -29,11 +28,24 @@ bool fuzzyEquals(const T& a1, const T& a2) {
     return true;
 }
 
-int main() {
+std::vector<std::string> tokenize(std::string const &str, const char delim)
+{
+	// construct a stream from the string
+	std::stringstream ss(str);
 
-    sqlite3pp::database db("test.db");
-    sqlite3pp::query qry(db, "SELECT id, name, phone FROM contacts");
+	std::string s;
+    std::vector<std::string> out;
+	while (std::getline(ss, s, delim)) {
+		out.push_back(s);
+	}
+    return out;
+}
 
+int main(int argc, char *argv[]) {
+
+    if(argc != 2) {
+        return 0;
+    }
 
     std::array<Point, INPUT_DATA_SET_SIZE> data;
     std::array<Point, K> kar;
@@ -41,9 +53,15 @@ int main() {
     std::minstd_rand0 g(12345573);
     std::uniform_int_distribution <int> uf(0, data.size() - 1);
 
+    std::ifstream infile(argv[1]);
+    std::string line;
+
     std::for_each(data.begin(), data.end(), [&](Point& p) {
-        p.coordinates[0] = uf(g);
-        p.coordinates[1] = uf(g);
+        std::getline(infile,line);
+        std::vector<std::string> tmp = tokenize( line, ',');
+        for(int i = 0; i < COORDINATES_NUM; i++) {
+            p.coordinates[i] = std::stoi(tmp[i]);
+        }
     });
 
     for(int i = 0; i < kar.size(); i++) {
