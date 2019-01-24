@@ -10,11 +10,13 @@ namespace kmeans
 
 struct Point
 {
-    std::array<double, COORDINATES_NUMBER> coordinates;
+    std::array<double, COORDINATES_NUM> coordinates;
     int meta;
 
     Point& operator+=(const Point&);
     Point& operator/=(const int);
+
+    Point():meta(K) {}
 };
 
 double operator-(const Point&, const Point&);

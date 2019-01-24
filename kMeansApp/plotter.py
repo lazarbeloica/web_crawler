@@ -3,43 +3,71 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 import csv
+import matplotlib
+import os
 
-colormap = np.array(['r', 'g', 'b'])
-x = []
-y = []
-c = []
-
-with open('frames/point1.csv', 'r') as csvfile:
-    spamreader = csv.reader(csvfile, delimiter=',')
-    for row in spamreader:
-        x.append(int(row[0]))
-        y.append(int(row[1]))
-        c.append(int(row[2]))
-
+colormap = np.array(['grey','red','green','blue','yellow','brown','orange','purple','pink','cyan','olive'])
 fig, ax = plt.subplots()
-fig.set_tight_layout(True)
 
-ax.scatter(x, y, s=50, c=colormap[c])
+def get_data_from_csv(name):
+    x = []
+    columns = 0
+    with open(name, 'r') as csvfile:
+        spamreader = csv.reader(csvfile, delimiter=',')
+        tmp_reader = csv.reader(csvfile, delimiter=',')
+
+        columns = len(next(tmp_reader))
+        del tmp_reader
+
+    with open(name, 'r') as csvfile:
+        spamreader = csv.reader(csvfile, delimiter=',')
+
+        for n in xrange(columns):
+            x.append([])
+
+        for row in spamreader:
+            for i in range(len(row)):
+                x[i].append(int(float(row[i])))
+    return x, columns
+
+def draw_graph(data, columns, centers):
+
+    ax.cla()
+    if (columns == 3):
+        ax.scatter(data[0], data[1], s=50, c=colormap[data[columns - 1]])
+        ax.scatter(centers[0], centers[1], s=50, c='black')
+    elif (columns > 3):
+        ax.scatter(data[0], data[1], data[2], s=50, c=colormap[data[columns - 1]])
+        ax.scatter(centers[0], centers[1], centers[2], s=50, c='black')
+    else:
+        raise RuntimeError("U kom svetu ti zivis!?")
+
+    return ax
 
 def update(i):
-    print(i)
-    x = []
-    y = []
-    c = []
+    px, columns = get_data_from_csv("frames/point{}.csv".format(i))
+    cx = get_data_from_csv("frames/center{}.csv".format(i))[0]
 
-    with open('frames/point{}.csv'.format(i), 'r') as csvfile:
-        spamreader = csv.reader(csvfile, delimiter=',')
-        for row in spamreader:
-            x.append(int(row[0]))
-            y.append(int(row[1]))
-            c.append(int(row[2]))
+    ax = draw_graph(px, columns, cx)
+    label = 'Iteration: {}'.format(i)
+    ax.set_xlabel(label)
+    return ax
 
-    ax.scatter(x, y, s=50, c=colormap[c])
-    return ax,
+def main():
+    num_frames = sum([len(files) for r, d, files in os.walk("./frames/")]) / 2
+    fig.set_tight_layout(True)
+
+    px, columns = get_data_from_csv("frames/point0.csv")
+
+    cx = get_data_from_csv("frames/center0.csv")[0]
+
+    draw_graph(px, columns, cx)
+
+    anim = FuncAnimation(fig, update, frames=np.arange(1, num_frames), interval=700)
+    if len(sys.argv) > 1 and sys.argv[1] == 'save':
+        anim.save('line.gif', dpi=80, writer='imagemagick')
+    else:
+        plt.show()
 
 
-anim = FuncAnimation(fig, update, frames=np.arange(1, 10), interval=500)
-if len(sys.argv) > 1 and sys.argv[1] == 'save':
-    anim.save('line.gif', dpi=80, writer='imagemagick')
-else:
-    plt.show()
+if __name__ == "__main__": main()

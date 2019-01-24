@@ -3,57 +3,71 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 import csv
+import matplotlib
+import os
 
-def get_num_of_coor_from_csv(name):
-    with open('myfile.txt') as f:
-        first_line = f.readline()
-    return first_line.count(',') # num of separators is num of coordinates
+colormap = np.array(['grey','red','green','blue','yellow','brown','orange','purple','pink','cyan','olive'])
+fig, ax = plt.subplots()
 
 def get_data_from_csv(name):
-    x = [[],[],[]]
-    c = []
-
-    with open('frames/point1.csv', 'r') as csvfile:
+    x = []
+    columns = 0
+    with open(name, 'r') as csvfile:
         spamreader = csv.reader(csvfile, delimiter=',')
+        tmp_reader = csv.reader(csvfile, delimiter=',')
+
+        columns = len(next(tmp_reader))
+        del tmp_reader
+
+    with open(name, 'r') as csvfile:
+        spamreader = csv.reader(csvfile, delimiter=',')
+
+        for n in xrange(columns):
+            x.append([])
+
         for row in spamreader:
-            print(len(row))
-            for i in range(0, (len(row) - 1)):
-                x[i].append(int(row[i]))
+            for i in range(len(row)):
+                x[i].append(int(float(row[i])))
+    return x, columns
 
-            c.append(int(row[len(row) - 1]))
+def draw_graph(data, columns, centers):
 
-        return (x, c)
+    ax.cla()
+    if (columns == 3):
+        ax.scatter(data[0], data[1], s=50, c=colormap[data[columns - 1]])
+        ax.scatter(centers[0], centers[1], s=50, c='black')
+    elif (columns > 3):
+        ax.scatter(data[0], data[1], data[2], s=50, c=colormap[data[columns - 1]])
+        ax.scatter(centers[0], centers[1], centers[2], s=50, c='black')
+    else:
+        raise RuntimeError("U kom svetu ti zivis!?")
 
-colormap = np.array(['r', 'g', 'b'])
-
-fig, ax = plt.subplots()
-fig.set_tight_layout(True)
-
-px, c = get_data_from_csv("frames/point1.csv")
-cx = get_data_from_csv("frames/center1.csv")[0]
-
-print (cx[0])
-print (cx[1])
-ax.scatter(px[0], px[1], s=50, c=colormap[c])
-ax.scatter(cx[0], cx[1], s=50, c='y')
+    return ax
 
 def update(i):
-    print(i)
+    px, columns = get_data_from_csv("frames/point{}.csv".format(i))
+    cx = get_data_from_csv("frames/center{}.csv".format(i))[0]
 
-    px, c = get_data_from_csv("frames/point{}.csv".format(i))
-    cx = get_data_from_csv("frames/point{}.csv".format(i))[0]
+    ax = draw_graph(px, columns, cx)
+    label = 'Iteration: {}'.format(i)
+    ax.set_xlabel(label)
+    return ax
 
-    ax.scatter(px[0], px[1], s=50, c=colormap[c])
-    ax.scatter(cx[0], cx[1], s=50, c=colormap['y'])
+def main():
+    num_frames = sum([len(files) for r, d, files in os.walk("./frames/")]) / 2
+    fig.set_tight_layout(True)
 
-    return ax,
+    px, columns = get_data_from_csv("frames/point1.csv")
+
+    cx = get_data_from_csv("frames/center1.csv")[0]
+
+    draw_graph(px, columns, cx)
+
+    anim = FuncAnimation(fig, update, frames=np.arange(1, num_frames + 1), interval=700)
+    if len(sys.argv) > 1 and sys.argv[1] == 'save':
+        anim.save('line.gif', dpi=80, writer='imagemagick')
+    else:
+        plt.show()
 
 
-# FuncAnimation will call the 'update' function for each frame; here
-# animating over 10 frames, with an interval of 200ms between frames.
-anim = FuncAnimation(fig, update, frames=np.arange(1, 10), interval=200)
-if len(sys.argv) > 1 and sys.argv[1] == 'save':
-    anim.save('line.gif', dpi=80, writer='imagemagick')
-else:
-    # plt.show() will just loop the animation forever.
-    plt.show()
+if __name__ == "__main__": main()

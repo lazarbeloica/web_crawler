@@ -10,12 +10,15 @@
 #include <iterator>
 #include <string>
 
+#include <sqlite3pp.h>
+
 using namespace kmeans;
 
 double fuzzyLimit = 0.00002;
 
 template<class T>
-bool fuzzyEquals(T& a1, T& a2) {
+bool fuzzyEquals(const T& a1, const T& a2) {
+
     for(auto i = 0; i < a1.size(); i++) {
         for(auto j = 0; j < a1[i].coordinates.size(); j++){
             if ( fuzzyLimit < a1[i].coordinates[j] - a2[i].coordinates[j] ||
@@ -28,8 +31,12 @@ bool fuzzyEquals(T& a1, T& a2) {
 
 int main() {
 
-    std::array<Point, 100> data;
-    std::array<Point, 3> kar;
+    sqlite3pp::database db("test.db");
+    sqlite3pp::query qry(db, "SELECT id, name, phone FROM contacts");
+
+
+    std::array<Point, INPUT_DATA_SET_SIZE> data;
+    std::array<Point, K> kar;
 
     std::minstd_rand0 g(12345573);
     std::uniform_int_distribution <int> uf(0, data.size() - 1);
@@ -42,6 +49,12 @@ int main() {
     for(int i = 0; i < kar.size(); i++) {
         kar[i] = data[i];
     }
+
+    std::ofstream startCenters("frames/center0.csv");
+    std::ofstream startPoints("frames/point0.csv");
+
+    std::copy(kar.begin(), kar.end(), std::ostream_iterator<Point>(startCenters));
+    std::copy(data.begin(), data.end(), std::ostream_iterator<Point>(startPoints));
 
     auto old_kar = kar;
 
