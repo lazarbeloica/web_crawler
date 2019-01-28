@@ -1,5 +1,4 @@
 
-#include "kmeansPoint.hh"
 
 #include <algorithm>
 #include <random>
@@ -11,9 +10,46 @@
 #include <string>
 #include <sstream>
 
+
 using namespace kmeans;
 
 double fuzzyLimit = 0.00002;
+
+struct Point
+{
+    std::array<double, COORDINATES_NUM> coordinates;
+    int meta;
+
+    Point& operator+=(const Point&) {
+        std::transform(coordinates.begin(), coordinates.end(), rhs.coordinates.begin(), coordinates.begin(), [](auto x, auto y) {
+            return x + y;
+        });
+    };
+
+    Point& operator/=(const int) {
+        std::for_each(coordinates.begin(), coordinates.end(), [&](auto& x) {
+            x /= denominator;
+        });
+    };
+
+    Point():meta(K) {}
+};
+
+double operator-(const Point& a, const Point& b) {
+    std::array<double, COORDINATES_NUMBER> sum;
+    std::transform(a.coordinates.begin(), a.coordinates.end(), b.coordinates.begin(), sum.begin(), [&](auto x, auto y) {
+        return std::pow(x - y, 2);
+    });
+
+    return std::sqrt(std::accumulate(sum.begin(), sum.end(), 0));
+}
+
+std::ostream& operator<<(std::ostream& os, const Point& p) {
+    std::copy(p.coordinates.begin(), p.coordinates.end(), std::ostream_iterator<double>(os, ","));
+    os << p.meta;
+    os <<"\n";
+    return os;
+}
 
 template<class T>
 bool fuzzyEquals(const T& a1, const T& a2) {

@@ -1,6 +1,8 @@
 from common.db.dizcoz_db_driver import DiscozDBDriver
 from datetime import datetime
-
+import csv
+import os
+import kMeansApp.plotter
 
 query_base = "select {} from relevant_data {};"
 suported_coordinates = ["year_released", "genre", "style", "rating", "versions", "country", "album_name"]
@@ -12,35 +14,39 @@ def get_help():
     return help
 
 def trasncode_style(style):
-    code = ["Folk", "Progressive House", "Vocal", "Europop", "Techno", "Electro", "Experimental", "Pop Rock", "Ballad", "Progressive Trance", "Trance", "Punk", "Psy-Trance",
-            "House", "Alternative Rock", "Noise", "Ambient", "Black Metal", "Deep House", "Tech House", "Industrial", "Hardcore", "Indie Rock", "Funk", "Acoustic", "Abstract",
-            "Minimal", "Heavy Metal", "Thrash", "Hard Rock", "Disco", "Death Metal", "Drone", "Dark Ambient", "Downtempo", "Folk Rock", "Rock & Roll", "Classic Rock",
-            "Dub Techno", "Goa Trance", "Blues Rock", "Synth-pop", "Euro House", "New Wave", "Lo-Fi", "Garage Rock", "Pop Rap", "Psychedelic Rock", "Grindcore", "Post Rock",
-            "Conscious", "IDM", "Prog Rock", "Art Rock", "Doom Metal", "Schlager", "Hip Hop", "Emo", "Drum n Bass", "Harsh Noise Wall", "Grunge", "EBM", "Breakbeat", "Dub",
-            "Post-Punk", "Nu-Disco", "Dance-pop", "Avantgarde", "Nu Metal", "Romani", "Musique Concrète", "Jazz-Rock", "Indie Pop", "Trap", "Reggae", "Goth Rock", "Parody",
-            "Stoner Rock", "Brass Band", "Dubstep", "Gangsta", "Rhythmic Noise", "Thug Rap", "Power Metal", "Trip Hop", "Eurobeat", "Eurodance", "Leftfield", "Country Rock",
-            "Chanson", "Metalcore", "Soft Rock", "Fusion", "Instrumental", "Power Pop", "RnB/Swing", "Glitch", "Gypsy Jazz", "Easy Listening", "Rhythm & Blues",
-            "Contemporary", "Nursery Rhymes", "Power Electronics", "Shoegaze", "Acid", "Field Recording", "Oi", "Symphonic Rock", "Breaks", "Classical", "Contemporary Jazz",
-            "Deep Techno", "Free Improvisation", "Neo-Classical", "Darkwave", "Progressive Metal", "Ska", "Jazz-Funk", "Speed Metal", "Surf", "Reggaeton", "Soul",
-            "Electro House", "Jungle", "New Age", "Smooth Jazz", "Soundtrack", "Spoken Word", "Electric Blues", "Religious", "Krautrock", "Melodic Death Metal",
-            "Poetry", "Tech Trance", "Avant-garde Jazz", "Hardcore Hip-Hop", "Swing", "Rockabilly", "Roots Reggae", "Jazzy Hip-Hop", "Post-Modern", "Tribal",
-            "Melodic Hardcore", "Bass Music", "Crust", "Reggae-Pop", "Afrobeat", "Chiptune", "Modern", "Sludge Metal", "Country", "Ethereal", "Math Rock", "Neofolk",
-            "Radioplay", "Southern Rock", "Modern Classical", "Romantic", "Speech", "Audiobook", "Country Blues", "Crunk", "Educational", "Future Jazz", "Népzene",
-            "Pop Punk", "Salsa", "Comedy", "Latin Jazz", "Ragga HipHop", "Big Band", "Brit Pop", "Gothic Metal", "Medieval", "Minimal Techno", "Rumba", "Breakcore",
-            "Ethno-pop", "Free Jazz", "Laïkó", "Post-Hardcore", "Score", "Tropical House", "Acid House", "Big Beat", "Boom Bap", "Grime", "No Wave", "Space-Age",
-            "Story", "AOR", "Acid Jazz", "Baroque", "Cool Jazz", "Cut-up/DJ", "Dancehall", "Garage House", "Harmonica Blues", "Latin", "Rocksteady", "Soul-Jazz",
-            "Synthwave", "Theme", "Boogie", "Bossa Nova", "Broken Beat", "Chicago Blues", "Dixieland", "Favela Funk", "Glam", "Progressive Breaks", "Pub Rock",
-            "Ragga", "UK Garage", "Vaporwave", "Volksmusik", "Arena Rock", "Folk Metal", "Funk Metal", "G-Funk", "Illbient", "Jazzdance", "Modern Electric Blues",
-            "Musical", "Novelty", "Renaissance", "Space Rock", "Bubblegum", "Chillwave", "Delta Blues", "Freestyle", "Gospel", "Italo-Disco", "Lounge", "Monolog",
-            "Mouth Music", "Psychobilly", "Rebetiko", "Special Effects", "Tango", "Turntablism", "Witch House", "Bassline", "Beat", "Bossanova", "Contemporary R&B",
-            "Euro-Disco", "Ghetto House", "Ghettotech", "Hip-House", "Horrorcore", "Light Music", "Neo-Romantic", "Opera", "Screw", "Sound Collage", "Sound Poetry",
-            "Speedcore", "Therapy", "Acid Rock", "Beatdown", "Bounce", "Coldwave", "Cubano", "Deathcore", "Early", "Education", "Fado", "Flamenco", "Ghetto",
-            "Hard House", "Hi NRG", "Italodance", "Neo Trance", "Piano Blues", "Pipe & Drum", "Political", "Promotional", "Psychedelic", "Public Broadcast",
-            "Ragtime", "Éntekhno", "African", "Afro-Cuban", "Bluegrass", "Boogie Woogie", "Canzone Napoletana", "Celtic", "Cha-Cha", "Cumbia", "DJ Battle Tool",
-            "Deathrock", "Doo Wop", "Dream Pop", "Electroclash", "Free Funk", "Funeral Doom Metal", "Goregrind", "Happy Hardcore", "Hard Bop", "Hard Techno",
-            "Hardstyle", "Hiplife", "Impressionist", "Indian Classical", "Juke", "Jump Blues", "Mambo", "New Beat", "Nordic", "Overtone Singing", "Pornogrind",
-            "Power Violence", "Reggae Gospel", "Samba", "Schranz", "Sound Art", "Technical", "Texas Blues", "Thai Classical", "Tribal House", "UK Funky",
-            "Viking Metal", "Western Swing"]
+    code = ["Baroque", "Renaissance", "Classical", "Neo-Classical", "Modern Classical", "Indian Classical", "Thai Classical", "Impressionist",
+            "Medieval", "Religious", "Opera", "Post-Modern", "Fado", "Samba", "Schlager", "Chanson", "Folk", "African", "Afro-Cuban", "Celtic",
+            "Cha-Cha", "Country", "Western Swing", "Salsa", "Schranz", "Volksmusik", "Mambo", "Nordic", "Rumba", "Romani", "Gospel", "Latin", "Neofolk",
+            "Tango", "Cubano", "Flamenco",  "Canzone Napoletana", "Italodance", "Trap", "Nu-Disco", "Italo-Disco" ,
+            "Euro-Disco", "Disco", "Breakbeat", "Dub", "Drum n Bass", "Dubstep", "Psychedelic", "Progressive Trance", "Trance", "Psy-Trance", "Goa Trance",
+            "Tech Trance", "Neo Trance", "Techno", "Dub Techno", "Deep Techno", "Minimal Techno", "Hard Techno", "Electro", "Eurobeat", "Eurodance",
+            "Broken Beat", "Power Electronics", "Ghettotech", "Happy Hardcore", "Progressive Breaks", "Technical", "New Beat", "Cut-up/DJ", "Breakcore",
+            "Space-Age", "Dancehall", "DJ Battle Tool", "Big Beat", "Bass Music", "Hardstyle", "Electroclash", "Electro House", "Progressive House",
+            "House", "Deep House", "Tech House", "Euro House", "Tropical House", "Acid House", "Garage House", "Witch House", "Ghetto House", "Hip-House",
+            "Hard House", "Tribal House", "Hip Hop", "Trip Hop", "Jazzy Hip-Hop", "Hardcore Hip-Hop", "Ragga HipHop", "Freestyle", "Pop Rap", "Thug Rap",
+            "Ghetto", "Gangsta", "Europop", "Synth-pop", "Dance-pop", "Indie Pop", "Power Pop", "Reggae-Pop", "Brit Pop", "Ethno-pop", "Dream Pop",
+            "Pop Punk", "Ska", "Punk", "Psychobilly", "Post-Punk", "Melodic Hardcore", "Black Metal", "Heavy Metal", "Death Metal", "Doom Metal",
+            "Nu Metal", "Power Metal", "Progressive Metal", "Speed Metal", "Melodic Death Metal", "Sludge Metal", "Gothic Metal", "Folk Metal",
+            "Funeral Doom Metal", "Funk Metal", "Viking Metal", "Grindcore", "Horrorcore", "Grime", "Power Violence", "Metalcore", "Hardcore" ,
+            "Post-Hardcore", "Deathcore", "Speedcore", "Goregrind" , "Pornogrind", "Thrash", "Reggae", "Reggaeton", "Roots Reggae", "Reggae Gospel",
+            "Ragtime", "Pipe & Drum", "Ragga", "Afrobeat", "RnB/Swing", "Swing", "Rhythm & Blues", "Contemporary R&B", "Electric Blues", "Country Blues",
+            "Harmonica Blues", "Chicago Blues", "Bluegrass", "Modern Electric Blues", "Boogie Woogie", "Delta Blues", "Piano Blues", "Jump Blues",
+            "Texas Blues", "Rockabilly", "Rocksteady", "Emo", "Glam", "Pop Rock", "Blues Rock", "Alternative Rock", "Indie Rock", "Hard Rock",
+            "Folk Rock", "Garage Rock", "Psychedelic Rock", "Post Rock", "Prog Rock", "Art Rock", "Goth Rock", "Stoner Rock", "Country Rock",
+            "Soft Rock", "Symphonic Rock", "Krautrock", "Math Rock", "Southern Rock", "Pub Rock", "Arena Rock", "Space Rock", "Acid Rock",
+            "Classic Rock", "Deathrock", "Jazz-Rock", "Rock & Roll", "Grunge", "UK Garage", "Funk", "Favela Funk", "G-Funk", "Free Funk", "UK Funky",
+            "Dixieland", "Jazz-Funk", "Gypsy Jazz", "Contemporary Jazz", "Smooth Jazz", "Avant-garde Jazz", "Future Jazz", "Latin Jazz", "Free Jazz",
+            "Acid Jazz", "Cool Jazz", "Soul-Jazz", "Hard Bop", "Boogie", "Doo Wop", "Jazzdance", "Boom Bap", "Soul", "Overtone Singing" , "Vocal" ,
+            "Ambient" , "Acoustic" , "Dark Ambient" , "Downtempo", "Sound Art" , "Romantic" , "Ballad" , "Neo-Romantic",
+            "Exp erimental", "Noise", "Industrial", "Abstract", "Minimal", "Drone", "New Wave", "Lo-Fi", "Conscious", "IDM", "Harsh Noise Wall",
+            "EBM", "Avantgarde", "Parody", "Brass Band", "Rhythmic Noise", "Leftfield", "Fusion", "Instrumental", "Glitch", "Easy Listening",
+            "Contemporary", "Nursery Rhymes", "Shoegaze", "Acid", "Field Recording", "Oi", "Breaks", "Free Improvisation", "Darkwave", "Surf",
+            "Jungle", "New Age", "Soundtrack", "Spoken Word", "Poetry", "Tribal", "Crust", "Chiptune", "Modern", "Ethereal", "Radioplay", "Speech",
+            "Audiobook", "Crunk", "Educational", "Comedy", "Big Band", "Score", "No Wave", "Story", "AOR", "Synthwave", "Theme", "Bossa Nova",
+            "Vaporwave", "Illbient", "Musical", "Novelty", "Bubblegum", "Chillwave", "Lounge", "Monolog", "Mouth Music", "Rebetiko",
+            "Special Effects", "Turntablism", "Bassline", "Beat", "Bossanova", "Light Music", "Screw", "Sound Collage", "Sound Poetry", "Therapy",
+            "Beatdown", "Bounce", "Coldwave", "Early", "Education", "Hi NRG", "Political", "Promotional", "Public Broadcast", "Cumbia", "Hiplife", "Juke"]
+
     for i in range(0, len(code)):
         if code[i].lower() == style.lower():
             return i
@@ -49,7 +55,6 @@ def trasncode_style(style):
 
 def trasncode_genre(genre):
     code = {
-        "Folk" : 1,
         "Electronic" : 2,
         "Stage & Screen" : 3,
         "Hip Hop" : 4,
@@ -63,16 +68,18 @@ def trasncode_genre(genre):
         "Funk / Soul" : 12,
         "Reggae" : 13,
         "Non-Music" : 14,
-        "Country" : 15,
-        "Brass & Military" : 16,
-        "Brass" : 17,
-        "Military" : 18,
-        "Children's" : 19
+        "Folk" : 15,
+        "Country" : 16,
+        "Brass & Military" : 17,
+        "Brass" : 18,
+        "Military" : 19,
+        "Children's" : 20
     }
     try:
         return code[genre]
     except:
-        raise Exception("Album genre {} not supporetd".format(genre))
+        msg = "Album genre {} not supporetd".format(genre)
+        raise Exception(msg)
 
 def trasncode_year(year):
     return datetime(year).year
@@ -81,7 +88,7 @@ def trasncode_rating(rating):
     return int(rating)
 
 def trasncode_versions(ver):
-    return int(ver)
+    return int(float(ver))
 
 def trasncode_coutntry(country):
     code = {
@@ -90,14 +97,14 @@ def trasncode_coutntry(country):
     }
     return code[country.lower()]
 
-condition_map = {
-    "year_released" : "released is not NULL",
-    "genre" : "genre != ''",
-    "style" : "style != ''",
-    "rating" : "rating  != 0"
-}
-
 def build_query(data):
+    condition_map = {
+        "year_released" : "released is not NULL",
+        "genre" : "genre != ''",
+        "style" : "style != ''",
+        "rating" : "rating  != 0"
+    }
+
     tables = ""
     conditions = ""
 
@@ -109,18 +116,89 @@ def build_query(data):
         if el in condition_map:
             if conditions != "":
                 conditions = conditions + " AND "
+            else:
+                conditions = " where "
             conditions = conditions + condition_map[el]
 
     return query_base.format(tables, conditions)
 
 def ged_data_from_db(query):
-    print("stuff")
-    print("stuff")
     db = DiscozDBDriver()
     db._connect()
-    print("stuff")
-    #db.custom_query(query)
-    #return db.get_all_results()
+    db.custom_query(query)
+    return db.get_all_results()
 
-query = build_query(["genre", "rating"])
-ged_data_from_db(query)
+transcode_map = {
+        "year_released" : trasncode_year,
+        "genre" : trasncode_genre,
+        "style" : trasncode_style,
+        "rating" : trasncode_rating,
+        "versions" : trasncode_versions,
+        "country" : trasncode_year
+    }
+
+def transcode_coordinate_tuple(coordinates, data_tuple):
+
+    result = []
+    for i in range (0, len(coordinates)):
+        result.append(transcode_map[coordinates[i]](data_tuple[i]))
+    return result
+
+def transcode_coordinate_data(coordinates, data):
+    transcoded_matrix = []
+    for data_tuple in data:
+        transcoded_matrix.append(transcode_coordinate_tuple(coordinates, data_tuple))
+    return transcoded_matrix
+
+def print_to_csv(transcoded_matrix, filename):
+    lines = []
+    for row in transcoded_matrix:
+        line = ""
+        for el in row:
+            if line != "":
+                line = line + ", "
+            line = line + "{}".format(el)
+        line = line + "\n"
+        lines.append(line)
+
+    with open(filename, 'w') as output:
+        output.writelines(lines)
+
+    return len(lines)
+
+def run_compilation(K, data_set_size, num_of_coordinates, output_file):
+    cmd = "g++ -std=c++14 main.cpp kmeansPoint.cpp -DINPUT_DATA_SET_SIZE={} -DK={} -DCOORDINATES_NUM={} -o kMeansApp/{}".format(data_set_size, K, num_of_coordinates, output_file)
+    os.system(cmd)
+
+def run_kmeans_prog(program_name, data_file):
+    cmd = "./{} {}".format(program_name, data_file)
+    os.system(cmd)
+
+def check_coordinates(coordinates):
+    for coordinate in coordinates:
+        if coordinate not in suported_coordinates:
+            print("Coordinate {} not supported".format(coordinate))
+            print(get_help())
+            return False
+    return True
+
+def run(coordinates, K):
+    if len(coordinates) == 0:
+        print("No data to process")
+        print(get_help())
+        return True
+
+    if check_coordinates(coordinates) != True:
+        return False
+    if K < 1:
+        print("K must be positive integer!")
+
+    data_file = "points.csv"
+    program_name = "kmeansAlg"
+    query = build_query(coordinates)
+    print("Sending query to db: " + query)
+    data = ged_data_from_db(query)
+    print_to_csv(transcode_coordinate_data(coordinates, data), data_file)
+    run_compilation(K, len(data), len(coordinates), program_name)
+    run_kmeans_prog(program_name, data_file)
+

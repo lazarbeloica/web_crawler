@@ -1,7 +1,7 @@
+import kMeansApp.transcode
+import kMeansApp.plotter
 
-
-class KMeansCluster():
-
-    __init__(self):
-        pass
-
+def main():
+    coordinates = []
+    K = 1
+    transcode.run(coordinates, K)
