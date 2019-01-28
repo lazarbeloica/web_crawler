@@ -1,6 +1,6 @@
 from common.db.dizcoz_db_driver import DiscozDBDriver
 from datetime import datetime
-
+import csv
 
 query_base = "select {} from relevant_data {};"
 suported_coordinates = ["year_released", "genre", "style", "rating", "versions", "country", "album_name"]
@@ -72,7 +72,8 @@ def trasncode_genre(genre):
     try:
         return code[genre]
     except:
-        raise Exception("Album genre {} not supporetd".format(genre))
+        msg = "Album genre {} not supporetd".format(genre)
+        raise Exception(msg)
 
 def trasncode_year(year):
     return datetime(year).year
@@ -81,7 +82,7 @@ def trasncode_rating(rating):
     return int(rating)
 
 def trasncode_versions(ver):
-    return int(ver)
+    return int(float(ver))
 
 def trasncode_coutntry(country):
     code = {
@@ -90,14 +91,14 @@ def trasncode_coutntry(country):
     }
     return code[country.lower()]
 
-condition_map = {
-    "year_released" : "released is not NULL",
-    "genre" : "genre != ''",
-    "style" : "style != ''",
-    "rating" : "rating  != 0"
-}
-
 def build_query(data):
+    condition_map = {
+        "year_released" : "released is not NULL",
+        "genre" : "genre != ''",
+        "style" : "style != ''",
+        "rating" : "rating  != 0"
+    }
+
     tables = ""
     conditions = ""
 
@@ -109,18 +110,58 @@ def build_query(data):
         if el in condition_map:
             if conditions != "":
                 conditions = conditions + " AND "
+            else:
+                conditions = " where "
             conditions = conditions + condition_map[el]
 
     return query_base.format(tables, conditions)
 
 def ged_data_from_db(query):
-    print("stuff")
-    print("stuff")
     db = DiscozDBDriver()
     db._connect()
-    print("stuff")
-    #db.custom_query(query)
-    #return db.get_all_results()
+    db.custom_query(query)
+    return db.get_all_results()
 
-query = build_query(["genre", "rating"])
-ged_data_from_db(query)
+transcode_map = {
+        "year_released" : trasncode_year,
+        "genre" : trasncode_genre,
+        "style" : trasncode_style,
+        "rating" : trasncode_rating,
+        "versions" : trasncode_versions,
+        "country" : trasncode_year
+    }
+
+def transcode_coordinate_tuple(coordinates, data_tuple):
+
+    result = []
+    for i in range (0, len(coordinates)):
+        result.append(transcode_map[coordinates[i]](data_tuple[i]))
+    return result
+
+def transcode_coordinate_data(coordinates, data):
+    transcoded_matrix = []
+    for data_tuple in data:
+        transcoded_matrix.append(transcode_coordinate_tuple(coordinates, data_tuple))
+    return transcoded_matrix
+
+def print_to_csv(transcoded_matrix, filename):
+    lines = []
+    for row in transcoded_matrix:
+        line = ""
+        for el in row:
+            if line != "":
+                line = line + ", "
+            line = line + "{}".format(el)
+        line = line + "\n"
+        lines.append(line)
+
+    with open(filename, 'w') as output:
+        output.writelines(lines)
+
+    return len(lines)
+
+input = ["versions", "rating"]
+query = build_query(input)
+print(query)
+print(transcode_coordinate_tuple(input, ged_data_from_db(query)[0]))
+print_to_csv(transcode_coordinate_data(input, ged_data_from_db(query)), "file.csv")

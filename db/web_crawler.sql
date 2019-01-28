@@ -113,3 +113,9 @@
 		REFERENCES artist(id),
 		primary key(album_id, artist_id)
 	);
+
+    CREATE VIEW relevant_data (album_name, versions, year_released, country, rating, genre, style)
+    AS
+    select al.album_name, al.versions, al.released, al.country, al.rating, alge.genre, alst.style
+    from album al left join album_genre alge on al.id = alge.album_id left join album_style alst on alge.album_id = alst.album_id;
+

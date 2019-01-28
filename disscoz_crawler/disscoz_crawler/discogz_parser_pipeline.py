@@ -28,7 +28,7 @@ class DisscozParserPipeline(object):
         pass
 
     def _clense_name(self, name):
-        return re.sub('\([0-9]+\)','',name).strip()
+        return re.sub(r'\([0-9]+\)','',name).strip()
 
 
     def parse_artist_name(self, response):
