@@ -22,7 +22,7 @@ def get_data_from_csv(name):
     with open(name, 'r') as csvfile:
         spamreader = csv.reader(csvfile, delimiter=',')
 
-        for n in xrange(columns):
+        for n in range(columns):
             x.append([])
 
         for row in spamreader:
@@ -45,11 +45,11 @@ def draw_graph(data, columns, centers):
     return ax
 
 def update(i):
-    px, columns = get_data_from_csv("frames/point{}.csv".format(i))
-    cx = get_data_from_csv("frames/center{}.csv".format(i))[0]
+    px, columns = get_data_from_csv("frames/point{}.csv".format(int(i)))
+    cx = get_data_from_csv("frames/center{}.csv".format(int(i)))[0]
 
     ax = draw_graph(px, columns, cx)
-    label = 'Iteration: {}'.format(i)
+    label = 'Iteration: {}'.format(int(i))
     ax.set_xlabel(label)
     return ax
 

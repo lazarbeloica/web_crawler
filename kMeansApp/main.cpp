@@ -10,23 +10,20 @@
 #include <string>
 #include <sstream>
 
-
-using namespace kmeans;
-
 double fuzzyLimit = 0.00002;
 
 struct Point
 {
-    std::array<double, COORDINATES_NUM> coordinates;
+    std::array<double, COORDINATES_NUMBER> coordinates;
     int meta;
 
-    Point& operator+=(const Point&) {
+    Point& operator+=(const Point& rhs) {
         std::transform(coordinates.begin(), coordinates.end(), rhs.coordinates.begin(), coordinates.begin(), [](auto x, auto y) {
             return x + y;
         });
     };
 
-    Point& operator/=(const int) {
+    Point& operator/=(const int denominator) {
         std::for_each(coordinates.begin(), coordinates.end(), [&](auto& x) {
             x /= denominator;
         });
@@ -86,7 +83,7 @@ int main(int argc, char *argv[]) {
     std::array<Point, INPUT_DATA_SET_SIZE> data;
     std::array<Point, K> kar;
 
-    std::minstd_rand0 g(12345573);
+    std::minstd_rand0 g(32323521313535);
     std::uniform_int_distribution <int> uf(0, data.size() - 1);
 
     std::ifstream infile(argv[1]);
@@ -95,13 +92,13 @@ int main(int argc, char *argv[]) {
     std::for_each(data.begin(), data.end(), [&](Point& p) {
         std::getline(infile,line);
         std::vector<std::string> tmp = tokenize( line, ',');
-        for(int i = 0; i < COORDINATES_NUM; i++) {
+        for(int i = 0; i < COORDINATES_NUMBER; i++) {
             p.coordinates[i] = std::stoi(tmp[i]);
         }
     });
 
     for(int i = 0; i < kar.size(); i++) {
-        kar[i] = data[i];
+        kar[i] = data[uf(g)];
     }
 
     std::ofstream startCenters("frames/center0.csv");

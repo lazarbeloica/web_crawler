@@ -167,11 +167,13 @@ def print_to_csv(transcoded_matrix, filename):
     return len(lines)
 
 def run_compilation(K, data_set_size, num_of_coordinates, output_file):
-    cmd = "g++ -std=c++14 main.cpp kmeansPoint.cpp -DINPUT_DATA_SET_SIZE={} -DK={} -DCOORDINATES_NUM={} -o kMeansApp/{}".format(data_set_size, K, num_of_coordinates, output_file)
+    cmd = "g++ -std=c++14 kMeansApp/main.cpp -DINPUT_DATA_SET_SIZE={} -DK={} -DCOORDINATES_NUMBER={} -o kMeansApp/{}".format(data_set_size, K, num_of_coordinates, output_file)
+    print(cmd)
     os.system(cmd)
 
 def run_kmeans_prog(program_name, data_file):
-    cmd = "./{} {}".format(program_name, data_file)
+    cmd = "cd kMeansApp; ./{} {}".format(program_name, data_file)
+    print(cmd)
     os.system(cmd)
 
 def check_coordinates(coordinates):
@@ -193,12 +195,13 @@ def run(coordinates, K):
     if K < 1:
         print("K must be positive integer!")
 
-    data_file = "points.csv"
+    data_file = "kMeansApp/points.csv"
     program_name = "kmeansAlg"
     query = build_query(coordinates)
     print("Sending query to db: " + query)
     data = ged_data_from_db(query)
     print_to_csv(transcode_coordinate_data(coordinates, data), data_file)
     run_compilation(K, len(data), len(coordinates), program_name)
-    run_kmeans_prog(program_name, data_file)
+    run_kmeans_prog(program_name, "points.csv")
+    return True
 
