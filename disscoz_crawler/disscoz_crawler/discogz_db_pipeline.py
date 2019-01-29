@@ -9,7 +9,7 @@ from dateutil import parser
 from datetime import datetime
 
 
-logging.getLogger().setLevel(logging.INFO)
+#logging.getLogger().setLevel(logging.INFO)
 
 
 class DisscozCrawlerDBPipeline(object):
@@ -104,6 +104,25 @@ class DisscozCrawlerDBPipeline(object):
             logging.error('Album already in db - ' + album_name)
             raise Exception("Album already in db - " + album_name)
 
+    def _clense_string(self, string):
+        print()
+        print("Got string - " + string)
+        print()
+        special_chars = ["|", "&"]
+        string = string.strip()
+        for char in special_chars:
+            pos = string.find(char)
+            if pos == 0:
+                string = string[1:]
+                string = string.strip()
+            if pos == len(string - 1):
+                string = string[:-1]
+                string = string.strip()
+        print()
+        print("Proccessed string - " + string)
+        print()
+        return string
+
 
     def store_profile(self, profile, album_id):
         logging.info("DB: Stioring artalbumist profile to db")
@@ -121,7 +140,7 @@ class DisscozCrawlerDBPipeline(object):
                 if trate == 'Style':
                     styles = profile[trate].split(',')
                     for style in styles:
-
+                        style = self._clense_string(style)
                         logging.debug('DB: Storing format:' + style)
                         self._cursor.execute("""INSERT INTO album_style (album_id, style) VALUES ({0},"{1}");""".format(album_id, style))
                         self._db.commit()
@@ -130,7 +149,7 @@ class DisscozCrawlerDBPipeline(object):
                 if trate == 'Genre':
                     genres = profile[trate].split(',')
                     for genre in genres:
-
+                        genre = self._clense_string(genre)
                         logging.debug('DB: Storing format:' + genre)
                         self._cursor.execute("""INSERT INTO album_genre (album_id, genre) VALUES ({0},"{1}");""".format(album_id, genre))
                         self._db.commit()
