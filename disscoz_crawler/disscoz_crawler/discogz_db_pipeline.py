@@ -131,7 +131,9 @@ class DisscozCrawlerDBPipeline(object):
                 if trate == 'Format':
                     formats = profile[trate].split(',')
                     for album_format in formats:
-
+                        if album_format == '':
+                            continue
+                        album_format = album_format[:album_format.findfirstindex('-')]
                         logging.debug('DB: Storing format:' + album_format)
                         self._cursor.execute("""INSERT INTO album_format (album_id, album_format) VALUES ({0},"{1}");""".format(album_id, album_format))
                         self._db.commit()
@@ -140,6 +142,8 @@ class DisscozCrawlerDBPipeline(object):
                 if trate == 'Style':
                     styles = profile[trate].split(',')
                     for style in styles:
+                        if style == '':
+                            continue
                         style = self._clense_string(style)
                         logging.debug('DB: Storing format:' + style)
                         self._cursor.execute("""INSERT INTO album_style (album_id, style) VALUES ({0},"{1}");""".format(album_id, style))
@@ -149,6 +153,8 @@ class DisscozCrawlerDBPipeline(object):
                 if trate == 'Genre':
                     genres = profile[trate].split(',')
                     for genre in genres:
+                        if genre == '':
+                            continue
                         genre = self._clense_string(genre)
                         logging.debug('DB: Storing format:' + genre)
                         self._cursor.execute("""INSERT INTO album_genre (album_id, genre) VALUES ({0},"{1}");""".format(album_id, genre))
