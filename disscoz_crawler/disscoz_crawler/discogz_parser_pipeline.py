@@ -95,7 +95,7 @@ class DisscozParserPipeline(object):
         data = {}
         for i in range (0, len(content_selectors)):
             contend = converter.handle(content_selectors[i].extract())
-            data[header_list[i].replace(':', '')] = contend.strip()
+            data[header_list[i].replace(':', '')] = str.strip(contend)
 
         return data
 
@@ -116,7 +116,10 @@ class DisscozParserPipeline(object):
             title = selector.xpath("./td[@class='track tracklist_track_title '] |  ./td[@class='track tracklist_track_title mini_playlist_track_has_artist']").xpath("./a/span/text() | ./span/text()").extract()[0].strip()
             duration = selector.xpath("./td[@class='tracklist_track_duration']/span/text()").extract()
             if duration != []:
-                duration = [datetime.strptime(duration[0].strip(), '%M:%S')]
+                try:
+                    duration = [datetime.strptime(duration[0].strip(), '%M:%S')]
+                except:
+                    duration = [datetime.strptime(duration[0].strip(), '%H:%M:%S')]
             else:
                 duration = None
 

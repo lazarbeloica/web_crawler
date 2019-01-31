@@ -9,7 +9,7 @@ from dateutil import parser
 from datetime import datetime
 
 
-#logging.getLogger().setLevel(logging.INFO)
+logging.getLogger().setLevel(logging.DEBUG)
 
 
 class DisscozCrawlerDBPipeline(object):
@@ -105,9 +105,6 @@ class DisscozCrawlerDBPipeline(object):
             raise Exception("Album already in db - " + album_name)
 
     def _clense_string(self, string):
-        print()
-        print("Got string - " + string)
-        print()
         special_chars = ["|", "&"]
         string = string.strip()
         for char in special_chars:
@@ -115,30 +112,16 @@ class DisscozCrawlerDBPipeline(object):
             if pos == 0:
                 string = string[1:]
                 string = string.strip()
-            if pos == len(string - 1):
+            if pos == len(string) - 1:
                 string = string[:-1]
                 string = string.strip()
-        print()
-        print("Proccessed string - " + string)
-        print()
         return string
 
 
     def store_profile(self, profile, album_id):
-        logging.info("DB: Stioring artalbumist profile to db")
+        logging.info("DB: Stioring profile profile to db")
         for trate in profile:
             try:
-                if trate == 'Format':
-                    formats = profile[trate].split(',')
-                    for album_format in formats:
-                        if album_format == '':
-                            continue
-                        album_format = album_format[:album_format.findfirstindex('-')]
-                        logging.debug('DB: Storing format:' + album_format)
-                        self._cursor.execute("""INSERT INTO album_format (album_id, album_format) VALUES ({0},"{1}");""".format(album_id, album_format))
-                        self._db.commit()
-                        continue
-
                 if trate == 'Style':
                     styles = profile[trate].split(',')
                     for style in styles:
@@ -161,10 +144,10 @@ class DisscozCrawlerDBPipeline(object):
                         self._db.commit()
                         continue
 
-                if trate != 'Release' and trate != 'Country':
-                    query_data = [album_id, trate, profile[trate]]
+                if trate != 'Released' and trate != 'Country' and trate != 'Genre' and trate != 'Style':
+                    query_data = [album_id, trate.strip(), profile[trate].strip()]
                     logging.debug('DB: Storing trate ' + trate + ':' + profile[trate])
-                    self._cursor.execute("""INSERT INTO album_misc_content (album_id, header, content) VALUES ({0},"{1}","{2}");""".format(*query_data))
+                    self._cursor.execute("""INSERT INTO album_misc_content (album_id, header, content) VALUES ({0},'{1}','{2}');""".format(*query_data))
 
             except Exception as err:
                 self._db.rollback()
@@ -186,7 +169,7 @@ class DisscozCrawlerDBPipeline(object):
             except Exception as err:
                 self._db.rollback()
                 logging.error(err)
-                logging.error('Track in db already - ' + track)
+                logging.error('Track in db already - ' + track[0])
 
     def _artist_id_for_name(self, artist_name):
         '''
@@ -253,6 +236,7 @@ class DisscozCrawlerDBPipeline(object):
         except Exception as error:
             logging.error("An error with db occured")
             logging.error(error)
+            logging.error(item)
             return item
 
         self.count = self.count + 1
