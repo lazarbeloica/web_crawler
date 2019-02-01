@@ -45,13 +45,14 @@ def trasncode_style(style):
             "Audiobook", "Crunk", "Educational", "Comedy", "Big Band", "Score", "No Wave", "Story", "AOR", "Synthwave", "Theme", "Bossa Nova",
             "Vaporwave", "Illbient", "Musical", "Novelty", "Bubblegum", "Chillwave", "Lounge", "Monolog", "Mouth Music", "Rebetiko",
             "Special Effects", "Turntablism", "Bassline", "Beat", "Bossanova", "Light Music", "Screw", "Sound Collage", "Sound Poetry", "Therapy",
-            "Beatdown", "Bounce", "Coldwave", "Early", "Education", "Hi NRG", "Political", "Promotional", "Public Broadcast", "Cumbia", "Hiplife", "Juke"]
+            "Beatdown", "Bounce", "Coldwave", "Early", "Education", "Hi NRG", "Political", "Promotional", "Public Broadcast", "Cumbia", "Hiplife", "Juke", "Experimental"]
 
     for i in range(0, len(code)):
         if code[i].lower() == style.lower():
             return i
 
-    raise Exception("Style not suported")
+    print("Style not suported: " + style)
+    return len(code)
 
 def trasncode_genre(genre):
     code = {
@@ -79,7 +80,8 @@ def trasncode_genre(genre):
         return code[genre]
     except:
         msg = "Album genre {} not supporetd".format(genre)
-        raise Exception(msg)
+        print(msg)
+        return len(code)
 
 def trasncode_year(year):
     return datetime(year).year
@@ -134,7 +136,7 @@ transcode_map = {
         "style" : trasncode_style,
         "rating" : trasncode_rating,
         "versions" : trasncode_versions,
-        "country" : trasncode_year
+        "country" : trasncode_coutntry
     }
 
 def transcode_coordinate_tuple(coordinates, data_tuple):

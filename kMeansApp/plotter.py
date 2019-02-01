@@ -34,11 +34,11 @@ def draw_graph(data, columns, centers):
 
     ax.cla()
     if (columns == 3):
-        ax.scatter(data[0], data[1], s=50, c=colormap[data[columns - 1]])
-        ax.scatter(centers[0], centers[1], s=50, c='black')
+        ax.scatter(data[0], data[1], c=colormap[data[columns - 1]])
+        ax.scatter(centers[0], centers[1], c='black')
     elif (columns > 3):
-        ax.scatter(data[0], data[1], data[2], s=50, c=colormap[data[columns - 1]])
-        ax.scatter(centers[0], centers[1], centers[2], s=50, c='black')
+        ax.scatter(data[0], data[1], data[2], c=colormap[data[columns - 1]])
+        ax.scatter(centers[0], centers[1], centers[2], c='black')
     else:
         raise RuntimeError("U kom svetu ti zivis!?")
 
