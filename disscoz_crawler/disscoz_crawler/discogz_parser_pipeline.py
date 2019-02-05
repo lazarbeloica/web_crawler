@@ -95,6 +95,11 @@ class DisscozParserPipeline(object):
         data = {}
         for i in range (0, len(content_selectors)):
             contend = converter.handle(content_selectors[i].extract())
+            if '\n' in contend:
+                print()
+                print(contend)
+                print()
+                print(str.strip(contend))
             data[header_list[i].replace(':', '')] = str.strip(contend)
 
         return data

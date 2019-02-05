@@ -9,9 +9,15 @@ suported_coordinates = ["year_released", "genre", "style", "rating", "versions",
 
 def get_help():
     help = "Available input data options are:\n"
+    coords = ""
     for coordinate in suported_coordinates:
-        help = help + "* " + coordinate + "\n"
+        coords = coords + "," + coordinate
+    help = help + coords[1:]
     return help
+
+def normalize_code(code):
+    NORMALIZATION_COEF = 10
+    return code * 10
 
 def trasncode_style(style):
     code = ["Baroque", "Renaissance", "Classical", "Neo-Classical", "Modern Classical", "Indian Classical", "Thai Classical", "Impressionist",
@@ -47,12 +53,20 @@ def trasncode_style(style):
             "Special Effects", "Turntablism", "Bassline", "Beat", "Bossanova", "Light Music", "Screw", "Sound Collage", "Sound Poetry", "Therapy",
             "Beatdown", "Bounce", "Coldwave", "Early", "Education", "Hi NRG", "Political", "Promotional", "Public Broadcast", "Cumbia", "Hiplife", "Juke", "Experimental"]
 
+    value = -1
     for i in range(0, len(code)):
         if code[i].lower() == style.lower():
-            return i
+            value = i
+            break
 
-    print("Style not suported: " + style)
-    return len(code)
+    if value == -1:
+        print("Style not suported: " + style)
+        value = len(code)
+
+    MAX_STYLE_CODE = float(len(code))
+    MIN_STYLE_CODE = 0
+
+    return normalize_code((value - MIN_STYLE_CODE) / MAX_STYLE_CODE)
 
 def trasncode_genre(genre):
     code = {
@@ -74,34 +88,58 @@ def trasncode_genre(genre):
         "Brass & Military" : 17,
         "Brass" : 18,
         "Military" : 19,
-        "Children's" : 20
+        "Children's" : 20,
+        "other": 21
     }
+    value = -1
     try:
-        return code[genre]
+        value = code[genre]
     except:
         msg = "Album genre {} not supporetd".format(genre)
         print(msg)
-        return len(code)
+        value = code["other"]
+
+    MAX_STYLE_CODE = float(code["other"])
+    MIN_STYLE_CODE = 2
+
+    return normalize_code((value - MIN_STYLE_CODE) / MAX_STYLE_CODE)
+
 
 def trasncode_year(year):
-    return datetime(year).year
+    value = datetime(year).year
+    MAX_STYLE_CODE = float(2019)
+    MIN_STYLE_CODE = 1900
+
+    return normalize_code((value - MIN_STYLE_CODE) / MAX_STYLE_CODE)
 
 def trasncode_rating(rating):
-    return int(rating)
+    value = int(rating)
+    MAX_STYLE_CODE = float(5)
+    MIN_STYLE_CODE = 1
+
+    return normalize_code((value - MIN_STYLE_CODE) / MAX_STYLE_CODE)
 
 def trasncode_versions(ver):
-    return int(float(ver))
+    value = int(float(ver))
+    MAX_STYLE_CODE = float(10) # needs adjusting
+    MIN_STYLE_CODE = 1
+
+    return normalize_code((value - MIN_STYLE_CODE) / MAX_STYLE_CODE)
 
 def trasncode_coutntry(country):
     code = {
         "serbia" : 1,
         "yugoslavia" : 2
     }
-    return code[country.lower()]
+    value = code[country.lower()]
+    MAX_STYLE_CODE = float(2)
+    MIN_STYLE_CODE = 1
+
+    return normalize_code((value - MIN_STYLE_CODE) / MAX_STYLE_CODE)
 
 def build_query(data):
     condition_map = {
-        "year_released" : "released is not NULL",
+        "year_released" : "year_released is not NULL",
         "genre" : "genre != ''",
         "style" : "style != ''",
         "rating" : "rating  != 0"
@@ -169,12 +207,12 @@ def print_to_csv(transcoded_matrix, filename):
     return len(lines)
 
 def run_compilation(K, data_set_size, num_of_coordinates, output_file):
-    cmd = "g++ -std=c++14 kMeansApp/main.cpp -DINPUT_DATA_SET_SIZE={} -DK={} -DCOORDINATES_NUMBER={} -o kMeansApp/{}".format(data_set_size, K, num_of_coordinates, output_file)
+    cmd = "g++ -std=c++14 kMeansApp/main.cpp -O3 -DINPUT_DATA_SET_SIZE={} -DK={} -DCOORDINATES_NUMBER={} -o kMeansApp/{}".format(data_set_size, K, num_of_coordinates, output_file)
     print(cmd)
     os.system(cmd)
 
 def run_kmeans_prog(program_name, data_file):
-    cmd = "cd kMeansApp; ./{} {}".format(program_name, data_file)
+    cmd = "cd kMeansApp; rm frames/*; ./{} {}".format(program_name, data_file)
     print(cmd)
     os.system(cmd)
 

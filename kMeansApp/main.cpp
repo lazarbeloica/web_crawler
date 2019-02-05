@@ -102,10 +102,8 @@ int main(int argc, char *argv[]) {
     }
 
     std::ofstream startCenters("frames/center0.csv");
-    std::ofstream startPoints("frames/point0.csv");
 
     std::copy(kar.begin(), kar.end(), std::ostream_iterator<Point>(startCenters));
-    std::copy(data.begin(), data.end(), std::ostream_iterator<Point>(startPoints));
 
     auto old_kar = kar;
 
@@ -141,10 +139,12 @@ int main(int argc, char *argv[]) {
         });
 
         std::ofstream centers("frames/center" + std::to_string(i) + ".csv");
-        std::ofstream points("frames/point" + std::to_string(i) + ".csv");
+        std::ofstream pointsColours("frames/pointColour" + std::to_string(i) + ".csv");
 
         std::copy(kar.begin(), kar.end(), std::ostream_iterator<Point>(centers));
-        std::copy(data.begin(), data.end(), std::ostream_iterator<Point>(points));
+        std::for_each(data.begin(), data.end(), [&] (const Point p) {
+            pointsColours << p.meta << '\n';
+        });
 
     } while(!fuzzyEquals(kar, old_kar) && i < 10000);
 
