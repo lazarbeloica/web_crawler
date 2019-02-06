@@ -21,17 +21,14 @@ def get_data_from_csv(name):
     with open(name, 'r') as csvfile:
         spamreader = csv.reader(csvfile, delimiter=',')
 
-        for row in spamreader:
-            for i in range(len(row)):
-                val = float(row[i])
-                x.append(x)
+        for n in range(0,columns):
+            x.append([])
 
-    size = len(x)
-    print("OK")
-    print("OK")
-    res = np.array(x)
-    print(res)
-    return res
+        for row in spamreader:
+            for i in range(0, columns):
+                x[i].append(int(float(row[i])))
+
+    return x
 
 class PointPlotter():
     colormap = np.array(['red','green','blue','yellow','brown','orange','purple','pink','cyan','olive', 'grey'])

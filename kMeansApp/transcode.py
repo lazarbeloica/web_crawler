@@ -16,7 +16,7 @@ def get_help():
     return help
 
 def normalize_code(code):
-    NORMALIZATION_COEF = 10
+    NORMALIZATION_COEF = 1000
     return code * 10
 
 def trasncode_style(style):
