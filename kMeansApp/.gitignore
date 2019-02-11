@@ -2,3 +2,5 @@ frames/*
 *.out
 *.o
 *.csv
+kmeansAlg
+points.csv

@@ -41,6 +41,10 @@ double operator-(const Point& a, const Point& b) {
     return std::sqrt(std::accumulate(sum.begin(), sum.end(), 0));
 }
 
+bool operator==(const Point& a, const Point& b) {
+    return a.coordinates == b.coordinates;
+}
+
 std::ostream& operator<<(std::ostream& os, const Point& p) {
     std::copy(p.coordinates.begin(), p.coordinates.end(), std::ostream_iterator<double>(os, ","));
     os << p.meta;
@@ -98,7 +102,14 @@ int main(int argc, char *argv[]) {
     });
 
     for(int i = 0; i < kar.size(); i++) {
-        kar[i] = data[uf(g)];
+        auto tmp = data[uf(g)];
+        for (int j = 0; j < i; j++) {
+            if (tmp == kar[j]) {
+                auto tmp = data[uf(g)];
+                j = 0; // restart the loop
+            }
+        }
+        kar[i] = tmp;
     }
 
     std::ofstream startCenters("frames/center0.csv");

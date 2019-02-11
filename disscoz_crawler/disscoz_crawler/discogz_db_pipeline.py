@@ -9,7 +9,7 @@ from dateutil import parser
 from datetime import datetime
 
 
-logging.getLogger().setLevel(logging.DEBUG)
+logging.getLogger().setLevel(logging.INFO)
 
 
 class DisscozCrawlerDBPipeline(object):
@@ -105,7 +105,7 @@ class DisscozCrawlerDBPipeline(object):
             raise Exception("Album already in db - " + album_name)
 
     def _clense_string(self, string):
-        special_chars = ["|", "&"]
+        special_chars = ["|", "&", "\n"]
         string = string.strip()
         for char in special_chars:
             pos = string.find(char)
@@ -144,7 +144,7 @@ class DisscozCrawlerDBPipeline(object):
                         self._db.commit()
                         continue
 
-                if trate != 'Released' and trate != 'Country' and trate != 'Genre' and trate != 'Style':
+                if trate != 'Released' and trate != 'Year' and trate != 'Country' and trate != 'Genre' and trate != 'Style':
                     query_data = [album_id, trate.strip(), profile[trate].strip()]
                     logging.debug('DB: Storing trate ' + trate + ':' + profile[trate])
                     self._cursor.execute("""INSERT INTO album_misc_content (album_id, header, content) VALUES ({0},'{1}','{2}');""".format(*query_data))
@@ -228,7 +228,10 @@ class DisscozCrawlerDBPipeline(object):
         try:
             artist_id = self._artist_id_for_name(item['artist_name'])
 
-            album_id = self.store_general_album_info(item['album_name'], item['album_version'], item['profile']['Released'], item['profile']['Country'], item['album_rating'], artist_id)
+            if 'Released' in item['profile']:
+                album_id = self.store_general_album_info(item['album_name'], item['album_version'], item['profile']['Released'], item['profile']['Country'], item['album_rating'], artist_id)
+            else:
+                album_id = self.store_general_album_info(item['album_name'], item['album_version'], item['profile']['Year'], item['profile']['Country'], item['album_rating'], artist_id)
 
             self.store_profile(item['profile'], album_id)
             self.store_tracks(item['track_list'], album_id)

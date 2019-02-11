@@ -16,14 +16,10 @@ class DiscozSpider(scrapy.Spider):
 
     '''
 
-    download_delay = 1
-    COOKIES_ENABLED = False
-    ROBOTSTXT_OBEY = True
-
     name = 'discoz_spider'
     allowed_domains = ['discogs.com']
 
-    _url_base = 'https://www.discogs.com/search/?country_exact='
+    _url_base = 'https://www.discogs.com/search/?limit=250&country_exact={}&page=1'
 
 
     def __init__(self, category=None, *args, **kwargs):
@@ -53,7 +49,7 @@ class DiscozSpider(scrapy.Spider):
 
     def start_requests(self):
         logging.info("Spider " + self.name + "started scraping for country " + self.get_country())
-        yield scrapy.Request(url = self._url_base + self.get_country(), callback=self.parse_discogz)
+        yield scrapy.Request(url = self._url_base.format(self.get_country()), callback=self.parse_discogz)
 
 
     def parse_discogz(self, response):
