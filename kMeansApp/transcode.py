@@ -60,7 +60,7 @@ def trasncode_style(style):
             break
 
     if value == -1:
-        print("Style not suported: " + style)
+        #print("Style not suported: " + style)
         value = len(code)
 
     MAX_STYLE_CODE = float(len(code))
@@ -96,7 +96,7 @@ def trasncode_genre(genre):
         value = code[genre]
     except:
         msg = "Album genre {} not supporetd".format(genre)
-        print(msg)
+        #print(msg)
         value = code["other"]
 
     MAX_STYLE_CODE = float(code["other"])

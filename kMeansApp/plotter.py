@@ -94,11 +94,7 @@ class PointPlotter():
 
     def save_gif(self):
         self.prepare_plot()
-        self.anim.save('line.gif', dpi=80, writer='imagemagick')
-
-    def save_pic(self):
-        self.prepare_plot()
-        self.anim.save('line.gif', dpi=80, writer='imagemagick')
+        self.anim.save('graph.gif', dpi=80, writer='imagemagick')
 
 def plot(action, plot_in_3d = False):
     frames_dir = "kMeansApp/frames"
@@ -107,6 +103,7 @@ def plot(action, plot_in_3d = False):
 
     if action == 'save':
         point_plotter.save_gif()
+        print("saved")
     else:
         point_plotter.plot_gif()
 
