@@ -1,3 +1,4 @@
+	DROP VIEW relevant_data ;
 	DROP TABLE album_vocals;
     DROP TABLE album_writers;
     DROP TABLE album_aragments;
@@ -5,14 +6,13 @@
     DROP TABLE album_genre;
     DROP TABLE album_style;
     DROP TABLE album_misc_content;
-    DROP TABLE album_format;
 	DROP TABLE album;
 	DROP TABLE artist;
 
 	CREATE TABLE artist
 	(
 		id INT PRIMARY KEY AUTO_INCREMENT,
-		artist_name national VARCHAR(60),
+		artist_name national VARCHAR(90),
 		unique(artist_name)
 	);
 
@@ -20,7 +20,7 @@
 	(
 		id int auto_increment primary key,
 		artist_id int not null,
-		album_name national varchar(60) not null,
+		album_name national varchar(90) not null,
 		versions int not null,
 		released DATE default null,
 		country national VARCHAR(60),
@@ -49,16 +49,6 @@
 		unique(album_id, genre)
 	);
 
-	CREATE TABLE album_format
-	(
-		id INT AUTO_INCREMENT PRIMARY KEY,
-		album_id INT NOT NULL,
-		album_format VARCHAR(40),
-		FOREIGN KEY fk_id(album_id)
-		REFERENCES album(id),
-		unique(album_id, album_format)
-	);
-
 	CREATE TABLE album_misc_content
 	(
 		id INT AUTO_INCREMENT PRIMARY KEY,
@@ -74,7 +64,7 @@
 	(
 		id INT AUTO_INCREMENT PRIMARY KEY,
 		album_id INT NOT NULL,
-		track_name national varchar(60),
+		track_name national varchar(90),
         duration int,
 		FOREIGN KEY fk_id(album_id)
 		REFERENCES album(id),
@@ -113,3 +103,8 @@
 		REFERENCES artist(id),
 		primary key(album_id, artist_id)
 	);
+
+    CREATE VIEW relevant_data (album_name, versions, year_released, country, rating, genre, style)
+    AS
+    select al.album_name, al.versions, al.released, al.country, al.rating, alge.genre, alst.style
+    from album al left join album_genre alge on al.id = alge.album_id left join album_style alst on alge.album_id = alst.album_id;

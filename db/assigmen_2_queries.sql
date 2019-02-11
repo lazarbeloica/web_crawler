@@ -12,7 +12,7 @@ group by style;
 --   može deliti jedno mesto na rang listi, pa konačan broj albuma na listi može biti i veći od 10)
 select album_name
 from album
-group by versions asc
+order by versions asc
 LIMIT 10;
 
 -- d) prikazati prvih 50 osoba koje imaju:
@@ -40,6 +40,7 @@ limit 50;
 --   Year/Relased, Genre, Style)
 select track_name
 from track_list
-group by track_name, count(album_id)
+group by track_name
+order by count(album_id)
 limit 100
 
